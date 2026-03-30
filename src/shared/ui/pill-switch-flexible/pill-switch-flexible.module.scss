@@ -1,0 +1,209 @@
+.container {
+  display: inline-block;
+  padding: 4px;
+  background: $gray-200;  
+  border-radius: 6px;
+  position: relative;
+  box-sizing: border-box;
+
+  &.container_small {
+    padding: 3px;
+    border-radius: 6px;
+  }
+
+  &.container_medium {
+    padding: 4px;
+    border-radius: 6px;
+  }
+
+  &.container_large {
+    padding: 6px;
+    border-radius: 6px;
+  }
+
+  &.containerDisabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.wrapper {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  z-index: 1;
+}
+
+.indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: $bg-primary;  
+  border-radius: 6px;
+  transition: 
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  pointer-events: none;
+
+  .container_small & {
+    border-radius: 6px;
+  }
+
+  .container_medium & {
+    border-radius: 6px;
+  }
+
+  .container_large & {
+    border-radius: 6px;
+  }
+
+  .container_primary & {
+    box-shadow: 
+      0 2px 8px rgba($primary-500, 0.2),
+      0 1px 3px rgba($primary-500, 0.1);
+  }
+
+  .container_success & {
+    background: linear-gradient(135deg, $bg-primary 0%, $success-100 100%);
+    box-shadow: 
+      0 2px 8px rgba($success-500, 0.2),
+      0 1px 3px rgba($success-500, 0.1);
+  }
+
+  .container_danger & {
+    background: linear-gradient(135deg, $bg-primary 0%, $danger-100 100%);
+    box-shadow: 
+      0 2px 8px rgba($danger-500, 0.2),
+      0 1px 3px rgba($danger-500, 0.1); 
+  }
+}
+
+.option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  z-index: 1;
+  transition: 
+    color 0.2s ease,
+    opacity 0.2s ease;
+  white-space: nowrap;
+
+  .container_small & {
+    padding: 6px 12px;
+    gap: 4px;
+  }
+
+  .container_medium & {
+    padding: 8px 16px;
+    gap: 6px;
+  }
+
+  .container_large & {
+    padding: 10px 20px;
+    gap: 8px;
+  }
+
+  &.optionDisabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &:not(.optionSelected) {
+    color: $gray-600;
+  }
+
+  .container_primary &.optionSelected {
+    color: $primary-500;
+  }
+
+  .container_success &.optionSelected {
+    color: $success-500;
+  }
+
+  .container_danger &.optionSelected {
+    color: $danger-500; 
+  }
+}
+
+.radioInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.optionIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+
+  .container_small & {
+    font-size: 14px;
+  }
+
+  .container_medium & {
+    font-size: 16px;
+  }
+
+  .container_large & {
+    font-size: 18px;
+  }
+}
+
+.optionLabel {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+
+  .container_small & {
+    font-size: 12px;
+  }
+
+  .container_medium & {
+    font-size: 14px;
+  }
+
+  .container_large & {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .wrapper {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .option {
+    flex-shrink: 0;
+  }
+}

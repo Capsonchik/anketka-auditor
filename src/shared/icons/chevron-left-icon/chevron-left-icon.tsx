@@ -1,0 +1,57 @@
+import { type SVGProps } from 'react'
+
+import clsx from 'clsx'
+
+import styles from './chevron-left-icon.module.scss'
+
+export interface ChevronLeftIconProps extends Omit<SVGProps<SVGSVGElement>, 'width' | 'height'> {
+  width?: number | string
+  height?: number | string
+  className?: string
+}
+
+/**
+ * Иконка стрелки влево (Chevron Left)
+ *
+ * SVG иконка стрелки влево для пагинации, навигации и других компонентов.
+ *
+ * @component
+ * @param {object} props - Пропсы компонента
+ * @param {number | string} [props.width=24] - Ширина иконки
+ * @param {number | string} [props.height=24] - Высота иконки
+ * @param {string} [props.className] - Дополнительные CSS классы
+ * @returns {JSX.Element} Компонент иконки стрелки влево
+ *
+ * @example
+ * ```tsx
+ * <ChevronLeftIcon width={24} height={24} className={styles.icon} />
+ * ```
+ */
+export function ChevronLeftIcon(props: ChevronLeftIconProps | null = {}) {
+  const {
+    width = 24,
+    height = 24,
+    className,
+    ...restProps
+  } = props || {}
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={clsx(styles.chevronLeftIcon, className)}
+      {...restProps}
+    >
+      <path
+        d="M15 18L9 12L15 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+

@@ -1,0 +1,19 @@
+// Основные цвета проекта
+$primary-base: #ff8200; // Используем оранжевый из предыдущих шагов
+$secondary-base: #8b5cf6;
+$success-base: #10b981;
+$warning-base: #f59e0b;
+$danger-base: #ef4444;
+$info-base: #06b6d4;
+
+// Экспорт для использования в других файлах
+@forward 'sass:map' as map-*;
+
+$base-colors: (
+  'primary': $primary-base,
+  'secondary': $secondary-base,
+  'success': $success-base,
+  'warning': $warning-base,
+  'danger': $danger-base,
+  'info': $info-base
+);

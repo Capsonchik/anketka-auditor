@@ -1,0 +1,103 @@
+// =============================================
+// Animations Mixins
+// Миксины анимаций
+// =============================================
+
+/**
+ * Универсальный миксин для анимации мягкого появления элемента
+ *
+ * Создает плавную анимацию появления с изменением opacity и translate.
+ * Поддерживает различные направления: bottom, top, left, right.
+ *
+ * @param {string} $from - Направление: bottom, top, left, right
+ * @param {number} $distance - Расстояние смещения (по умолчанию 20px)
+ * @param {number} $duration - Длительность в секундах (по умолчанию 0.3s)
+ * @param {string} $easing - Функция плавности (по умолчанию ease-out)
+ *
+ * @example
+ * // Анимация снизу вверх
+ * .my-element {
+ *   @include fade-in-up('bottom', 30px, 0.4s);
+ * }
+ *
+ * @example
+ * // Анимация слева
+ * .my-element {
+ *   @include fade-in-up('left');
+ * }
+ */
+@mixin fade-in-up(
+  $from: 'bottom',
+  $distance: 20px,
+  $duration: 0.3s,
+  $easing: ease-out
+) {
+  $translate-start: translateY($distance);
+
+  @if $from == 'bottom' {
+    $translate-start: translateY($distance);
+  } @else if $from == 'top' {
+    $translate-start: translateY(-$distance);
+  } @else if $from == 'left' {
+    $translate-start: translateX(-$distance);
+  } @else if $from == 'right' {
+    $translate-start: translateX($distance);
+  }
+
+  $animation-name: fadeInUp-#{$from};
+
+  animation: $animation-name $duration $easing forwards;
+
+  @keyframes #{$animation-name} {
+    from {
+      opacity: 0;
+      transform: $translate-start;
+    }
+    to {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+  }
+}
+
+/**
+ * Универсальный миксин для анимации плавного исчезновения элемента
+ *
+ * @param {string} $to - Направление: bottom, top, left, right
+ * @param {number} $distance - Расстояние смещения (по умолчанию 20px)
+ * @param {number} $duration - Длительность в секундах (по умолчанию 0.3s)
+ * @param {string} $easing - Функция плавности (по умолчанию ease-in)
+ */
+@mixin fade-out(
+  $to: 'bottom',
+  $distance: 20px,
+  $duration: 0.3s,
+  $easing: ease-in
+) {
+  $translate-end: translateY($distance);
+
+  @if $to == 'bottom' {
+    $translate-end: translateY($distance);
+  } @else if $to == 'top' {
+    $translate-end: translateY(-$distance);
+  } @else if $to == 'left' {
+    $translate-end: translateX(-$distance);
+  } @else if $to == 'right' {
+    $translate-end: translateX($distance);
+  }
+
+  $animation-name: fadeOut-#{$to};
+
+  animation: $animation-name $duration $easing forwards;
+
+  @keyframes #{$animation-name} {
+    from {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+    to {
+      opacity: 0;
+      transform: $translate-end;
+    }
+  }
+}

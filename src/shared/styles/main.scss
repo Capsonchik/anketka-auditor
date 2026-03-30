@@ -1,0 +1,5 @@
+@use 'variables' as *;
+
+// Инициализация тем
+@include apply-theme('light');
+@include theme-switcher();

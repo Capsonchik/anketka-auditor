@@ -1,0 +1,20 @@
+// Scrollbar Mixins
+// Миксины для скроллбара
+
+/**
+ * Миксин для кастомной стилизации скроллбара
+ * @param $thumb-color - Цвет ползунка
+ * @param $track-color - Цвет трека
+ * @param $width - Ширина (по умолчанию 8px)
+ */
+@mixin custom-scrollbar(
+  $thumb-color: var(--color-gray-300),
+  $track-color: transparent,
+  $width: 8px
+) {
+  &::-webkit-scrollbar { width: $width; height: $width; }
+  &::-webkit-scrollbar-track { background: $track-color; }
+  &::-webkit-scrollbar-thumb { background: $thumb-color; border-radius: 4px; }
+  @supports not selector(::-webkit-scrollbar) { scrollbar-width: thin; scrollbar-color: $thumb-color $track-color; }
+  @media (pointer: coarse) { scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
+}

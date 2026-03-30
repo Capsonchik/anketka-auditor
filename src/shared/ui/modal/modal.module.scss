@@ -1,0 +1,81 @@
+@use "@shared/styles/_prelude.scss" as *;
+
+.root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; // По умолчанию клики проходят насквозь
+  
+  &.isOpen {
+    pointer-events: auto; // Когда открыто, ловим клики
+  }
+
+  &.centered {
+    align-items: center;
+  }
+
+  &:not(.centered) {
+    align-items: flex-start;
+    padding-top: 50px;
+  }
+}
+
+.backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  .isOpen & {
+    opacity: 1;
+  }
+}
+
+.modal {
+  position: relative;
+  background-color: $bg-primary;
+  border-radius: $radius-lg;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1;
+  
+  // Анимация появления по умолчанию (можно менять через миксины)
+  @include fade-in-up('top', 30px, 0.3s);
+
+  // Класс для "запрещающей" анимации ( shake / bounce )
+  &.staticShake {
+    animation: staticShake 0.4s ease-in-out;
+  }
+}
+
+// Анимация запрета (тряска)
+@keyframes staticShake {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.02); }
+  50% { transform: scale(0.98); }
+  75% { transform: scale(1.01); }
+}
+
+// Размеры
+.xs { width: 300px; }
+.sm { width: 400px; }
+.md { width: 600px; }
+.lg { width: 800px; }
+.full { 
+  width: calc(100% - 40px);
+  height: calc(100% - 40px);
+  max-height: none;
+}

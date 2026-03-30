@@ -1,0 +1,14 @@
+.button {
+  background-color: transparent;
+  border: none;
+  color: var(--btn-color, var(--primary-500));
+  font-weight: 500;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(var(--btn-color-rgb, 99, 102, 241), 0.05);
+  }
+
+  &:active:not(:disabled) {
+    background-color: rgba(var(--btn-color-rgb, 99, 102, 241), 0.1);
+  }
+}

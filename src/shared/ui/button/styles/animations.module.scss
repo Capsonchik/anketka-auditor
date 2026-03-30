@@ -1,0 +1,352 @@
+@use './mixins' as *;
+
+// Базовое правило для всех кнопок: псевдоэлементы ВСЕГДА сзади
+.swipe, .diagonal-swipe, .double-swipe, .diagonal-close, .zoning-in, .four-corners,
+.slice, .position-aware, .alternate, .smoosh, .vertical-overlap, .horizontal-overlap,
+.collision, .ripple {
+  &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+    z-index: 0 !important;
+  }
+}
+
+// swipe
+.swipe {
+  &:before {
+    content: '';
+    @include absolute(0,0,0,0);
+    background-color: var(--btn-anim-color);
+    transform: translateX(-100.1%);
+  }
+  &:hover {
+    &:before { transform: translateX(0); }
+  }
+}
+
+// diagonal-swipe
+.diagonal-swipe {
+  &:before {
+    content: '';
+    @include absolute(0, calc(var(--btn-height) * -0.6), 0, 0);
+    border-right: calc(var(--btn-height) * 0.6) solid transparent;
+    border-bottom: var(--btn-height) solid var(--btn-anim-color);
+    transform: translateX(-100.1%);
+  }
+  &:hover {
+    &:before { transform: translateX(0); }
+  }
+}
+
+// double-swipe
+.double-swipe {
+  &:before, &:after {
+    content: '';
+    @include absolute(0,0,0,0);
+    border-bottom: var(--btn-height) solid var(--btn-anim-color);
+  }
+  &:before {
+    right: calc(var(--btn-height) * -0.6);
+    border-right: calc(var(--btn-height) * 0.6) solid transparent;
+    transform: translateX(-100.1%);
+  }
+  &:after {
+    left: calc(var(--btn-height) * -0.6);
+    border-left: calc(var(--btn-height) * 0.6) solid transparent;
+    transform: translateX(100.1%);
+  }
+  &:hover {
+    &:before { transform: translateX(-40.1%); }
+    &:after { transform: translateX(40.1%); }
+  }
+}
+
+// diagonal-close
+.diagonal-close {
+  &:before, &:after {
+    content: '';
+    @include absolute(0,0,0,0);
+  }
+  &:before {
+    right: calc(var(--btn-height) * -0.6);
+    border-right: calc(var(--btn-height) * 0.6) solid transparent;
+    border-bottom: var(--btn-height) solid var(--btn-anim-color);
+    transform: translateX(-100.1%);
+  }
+  &:after {
+    left: calc(var(--btn-height) * -0.6);
+    border-left: calc(var(--btn-height) * 0.6) solid transparent;
+    border-top: var(--btn-height) solid var(--btn-anim-color);
+    transform: translateX(100.1%);
+  }
+  &:hover {
+    &:before { transform: translateX(-49.1%); }
+    &:after { transform: translateX(49.1%); }
+  }
+}
+
+// zoning-in
+.zoning-in {
+  // Используем все 4 псевдоэлемента для точного смыкания
+  &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+    content: '';
+    @include absolute(0,0,0,0);
+    background-color: var(--btn-anim-color);
+    transition: 0.5s ease-in-out;
+  }
+  // Начальное состояние: выведены за границы
+  &:before { transform: translateY(-100.1%); }
+  &:after { transform: translateY(100.1%); }
+  span:not([class*="content"]):before { transform: translateX(-101.1%); }
+  span:not([class*="content"]):after { transform: translateX(101.1%); }
+
+  &:hover {
+    // Смыкание в центре с перекрытием 2% для устранения щелей
+    &:before { transform: translateY(-49%); }
+    &:after { transform: translateY(49%); }
+    span:not([class*="content"]):before { transform: translateX(-49%); }
+    span:not([class*="content"]):after { transform: translateX(49%); }
+  }
+}
+
+// four-corners
+.four-corners {
+  &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+    content: '';
+    @include absolute(0,0,0,0);
+    background-color: var(--btn-anim-color);
+    transition: 0.5s ease-in-out;
+  }
+  // Начальное состояние: по углам вне видимости
+  &:before { transform: translate(-100.1%, -100.1%); }
+  &:after { transform: translate(-100.1%, 100.1%); }
+  span:not([class*="content"]):before { transform: translate(100.1%, -100.1%); }
+  span:not([class*="content"]):after { transform: translate(100.1%, 100.1%); }
+
+  &:hover {
+    // Смыкание в центре: 51% обеспечивает нахлест в 2% для устранения щелей
+    &:before { transform: translate(-49%, -49%); }
+    &:after { transform: translate(-49%, 49%); }
+    span:not([class*="content"]):before { transform: translate(49%, -49%); }
+    span:not([class*="content"]):after { transform: translate(49%, 49%); }
+  }
+}
+
+// slice
+.slice {
+  &:before, &:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 0 solid;
+    transform: rotate(360deg);
+  }
+  &:before {
+    top: 0;
+    left: 0;
+    border-color: transparent transparent var(--btn-anim-color) transparent;
+  }
+  &:after {
+    bottom: 0;
+    right: 0;
+    border-color: var(--btn-anim-color) transparent transparent transparent;
+  }
+  &:hover {
+    &:before {
+      border-width: 0 calc(var(--btn-width) * 1.05) var(--btn-height) 0;
+    }
+    &:after {
+      border-width: var(--btn-height) 0 0 calc(var(--btn-width) * 1.05);
+    }
+  }
+}
+
+// position-aware
+.position-aware {
+  span:not([class*="content"]) { // Таргетим только технический span (эффект)
+    --x: 50%;
+    --y: 50%;
+    position: absolute;
+    top: var(--y);
+    left: var(--x);
+    right: auto; // Сбрасываем наследование от базового span
+    bottom: auto; // Сбрасываем наследование от базового span
+    display: block;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background-color: var(--btn-anim-color);
+    transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+    transform: translate(-50%, -50%);
+    z-index: 0 !important;
+  }
+  &:hover {
+    span:not([class*="content"]) {
+      width: calc(var(--btn-width) * 2.5);
+      height: calc(var(--btn-width) * 2.5);
+    }
+  }
+  &:active {
+    background-color: var(--btn-color);
+  }
+}
+
+// alternate
+.alternate {
+  &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+    content: '';
+    @include absolute(0);
+    @include size(25.25%, 0);
+    background-color: var(--btn-anim-color);
+  }
+  &:before { left: 0; }
+  &:after { left: 50.1%; }
+  span:not([class*="content"]) {
+    &:before, &:after {
+      top: auto;
+      bottom: 0;
+    }
+    &:before { left: 25.1%; }
+    &:after { left: 75.1%; }
+  }
+  &:hover {
+    &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+      height: 101%;
+    }
+  }
+}
+
+// smoosh
+.smoosh {
+  &:before, &:after {
+    content: '';
+    @include absolute(0,0,0,0);
+    background-color: var(--btn-anim-color);
+  }
+  &:before { transform: translateY(-100.1%); }
+  &:after { transform: translateY(100.1%); }
+  &:hover {
+    &:before { transform: translateY(-49%); }
+    &:after { transform: translateY(49%); }
+  }
+}
+
+// vertical-overlap
+.vertical-overlap {
+  &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+    content: '';
+    @include absolute(0,null,null,0);
+    @include size(100.1%, 0);
+    background-color: var(--btn-anim-color);
+    opacity: 0.25;
+    transition-property: height, opacity;
+    transition-duration: 0.4s, 0.4s;
+    transition-timing-function: ease-in-out;
+  }
+  
+  &:after, span:not([class*="content"]):before {
+    top: auto;
+    bottom: 0;
+  }
+  
+  &:hover {
+    &:before, &:after {
+      height: 101%;
+      opacity: 1;
+      transition-delay: 0s, 0.8s;
+    }
+    span:not([class*="content"]):before, span:not([class*="content"]):after {
+      height: 101%;
+      opacity: 1;
+      transition-delay: 0.4s, 0.8s;
+    }
+  }
+
+  &:active {
+    background-color: var(--btn-color);
+  }
+}
+
+// horizontal-overlap
+.horizontal-overlap {
+  &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+    content: '';
+    @include absolute(0,null,null,0);
+    @include size(0, 100.1%);
+    background-color: var(--btn-anim-color);
+    opacity: 0.25;
+    transition-property: width, opacity;
+    transition-duration: 0.4s, 0.4s;
+    transition-timing-function: ease-in-out;
+  }
+  
+  &:after, span:not([class*="content"]):before {
+    left: auto;
+    right: 0;
+  }
+  
+  &:hover {
+    &:before, &:after {
+      width: 101%;
+      opacity: 1;
+      transition-delay: 0s, 0.8s;
+    }
+    span:not([class*="content"]):before, span:not([class*="content"]):after {
+      width: 101%;
+      opacity: 1;
+      transition-delay: 0.4s, 0.8s;
+    }
+  }
+
+  &:active {
+    background-color: var(--btn-color);
+  }
+}
+
+// collision
+.collision {
+  &:before, &:after {
+    @include absolute(50%);
+    content: '';
+    @include size(calc(var(--btn-height) * 0.25));
+    background-color: var(--btn-anim-color);
+    border-radius: 50%;
+  }
+  &:before { left: calc(var(--btn-height) * -0.25); transform: translate(-50%, -50%); }
+  &:after { right: calc(var(--btn-height) * -0.25); transform: translate(50%, -50%); }
+  &:hover {
+    &:before { animation: criss-cross-left 0.8s both; }
+    &:after { animation: criss-cross-right 0.8s both; }
+  }
+}
+
+// ripple
+.ripple {
+  &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+    content: '';
+    @include absolute(50%, null, null, 50%);
+    @include size(0);
+    background-color: var(--btn-anim-color);
+    transition: 0.5s ease-in-out;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  &:hover {
+    &:before, &:after, span:not([class*="content"]):before, span:not([class*="content"]):after {
+      @include size(calc(var(--btn-width) * 1.5));
+      border-radius: 0; // К концу анимации становится прямоугольным, заполняя кнопку
+    }
+  }
+}
+
+@keyframes criss-cross-left {
+  0% { left: calc(var(--btn-height) * -0.25); }
+  50% { left: 50%; @include size(calc(var(--btn-height) * 0.25)); }
+  100% { left: 50%; @include size(calc(var(--btn-width) * 2.2)); }
+}
+
+@keyframes criss-cross-right {
+  0% { right: calc(var(--btn-height) * -0.25); }
+  50% { right: 50%; @include size(calc(var(--btn-height) * 0.25)); }
+  100% { right: 50%; @include size(calc(var(--btn-width) * 2.2)); }
+}

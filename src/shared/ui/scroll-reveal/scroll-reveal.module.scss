@@ -1,0 +1,40 @@
+@use "@shared/styles/_prelude.scss" as *;
+
+.reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+  // Длительность и задержка задаются через инлайновые стили в TS
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+
+  // Состояния появления (начальные позиции)
+  &.animation-fade {
+    transform: none;
+  }
+
+  &.animation-slide-up {
+    transform: translateY(30px);
+  }
+
+  &.animation-slide-down {
+    transform: translateY(-30px);
+  }
+
+  &.animation-slide-left {
+    transform: translateX(30px);
+  }
+
+  &.animation-slide-right {
+    transform: translateX(-30px);
+  }
+
+  &.animation-scale {
+    transform: scale(0.95);
+  }
+
+  // Видимое состояние
+  &.visible {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) !important;
+  }
+}

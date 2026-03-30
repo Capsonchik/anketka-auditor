@@ -1,0 +1,191 @@
+@use './styles/mixins' as *;
+
+.button {
+  --btn-width: 0px; // Будет переопределено через JS
+  --btn-height: 0px; // Будет переопределено через JS
+  --btn-color: #{$gray-300};
+  --btn-color-dark: #{$gray-400};
+  --btn-anim-color: var(--btn-color-dark);
+  --btn-text-color: #{$gray-300};
+
+  position: relative;
+  display: inline-flex; // Теперь кнопка по умолчанию резиновая (inline)
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-transform: uppercase;
+  // border: 1px solid var(--btn-color); // УБРАНО отсюда, перенесено в appearance
+  // color: var(--btn-color); // УБРАНО отсюда, перенесено в appearance
+  color: var(--btn-text-color);
+  cursor: pointer;
+  background: none;
+  font-family: 'Open Sans', Helvetica, arial, sans-serif;
+  text-align: center;
+  text-decoration: none;
+  // padding: 0 2rem; // Базовый отступ
+  box-sizing: border-box;
+  border: none; // Сбрасываем дефолтный бордер кнопки
+
+  // ПРЯМОЕ КОПИРОВАНИЕ ПОВЕДЕНИЯ: Центрирование контента
+  // display: flex; (уже есть inline-flex)
+  // align-items: center;
+  // justify-content: center;
+
+  // Базовые правила для всех элементов
+  &,
+  &:before,
+  &:after,
+  span,
+  span:before,
+  span:after {
+    box-sizing: border-box;
+    // Ограничиваем transition конкретными свойствами для исключения мерцания
+    transition-property: color, background-color, border-color, border-width, transform, opacity, width, height, left, top;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-in-out;
+    
+    // Предотвращение мерцания и артефактов при анимациях
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    transform: translateZ(0);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  // Стилизация span согласно референсу
+  span {
+    // position: absolute; - УБРАНО для корректной работы fit-content
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1; // По умолчанию текст выше псевдоэлементов
+    pointer-events: none;
+  }
+
+  // Специфические классы для управления порядком наложения
+  .content {
+    position: relative; // Относительное позиционирование, чтобы respect padding
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    z-index: 2; // Текст ВСЕГДА выше всего
+  }
+
+  .effect {
+    @include absolute(0,0,0,0); // Эффект покрывает всю кнопку
+    z-index: 0; // Эффект ниже текста, но выше фона
+  }
+
+  // ВСЕ псевдоэлементы ВСЕГДА сзади контента
+  &:before,
+  &:after,
+  span:before,
+  span:after {
+    z-index: 0 !important;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Варианты цветов (Variants)
+.variant-primary {
+  --btn-color: var(--primary-500);
+  --btn-color-dark: var(--primary-700);
+  --btn-text-color: var(--primary-500);
+}
+.variant-success { 
+  --btn-color: #{$success-500}; 
+  --btn-color-dark: #{$success-700}; 
+  --btn-text-color: #{$success-500};
+}
+.variant-warning { 
+  --btn-color: #{$warning-500}; 
+  --btn-color-dark: #{$warning-700}; 
+  --btn-text-color: #{$warning-500};
+}
+.variant-danger { 
+  --btn-color: #{$danger-500}; 
+  --btn-color-dark: #{$danger-700}; 
+  --btn-text-color: #{$danger-500};
+}
+.variant-info { 
+  --btn-color: #{$info-500}; 
+  --btn-color-dark: #{$info-700}; 
+  --btn-text-color: #{$info-500};
+}
+.variant-default {
+  --btn-color: #{$gray-300};
+  --btn-color-dark: #{$gray-400};
+  --btn-text-color: #{$gray-600};
+
+  [data-theme='dark'] & {
+    --btn-color: #{$gray-500};
+    --btn-color-dark: #{$gray-400};
+    --btn-text-color: #{$gray-800};
+  }
+}
+
+// Внешний вид (Appearance) - Определяем ПОСЛЕ вариантов для корректного перекрытия --btn-text-color
+.appearance-default {
+  --btn-text-color: #fff;
+  background-color: var(--btn-color);
+  border: 1px solid var(--btn-color);
+  
+  &:not(.hasAnimation):hover {
+    background-color: var(--btn-color-dark);
+    border-color: var(--btn-color-dark);
+  }
+}
+
+.appearance-ghost {
+  --btn-anim-color: var(--btn-color);
+  color: var(--btn-text-color);
+  background-color: transparent;
+  border: 1px solid var(--btn-color);
+  
+  &:not(.hasAnimation):hover {
+    background-color: var(--btn-color);
+    --btn-text-color: #fff;
+  }
+  
+  &.hasAnimation:hover {
+    --btn-text-color: #fff;
+  }
+}
+
+.appearance-subtile {
+  --btn-anim-color: var(--btn-color);
+  color: var(--btn-text-color);
+  background-color: transparent;
+  border: 1px solid transparent; // Невидимый бордер для сохранения размеров
+  
+  &:not(.hasAnimation):hover {
+    background-color: var(--btn-color);
+    --btn-text-color: #fff;
+  }
+
+  &.hasAnimation:hover {
+    --btn-text-color: #fff;
+  }
+}
+
+// Размеры (сохраняем для проекта)
+.xs { padding: 0.25rem 0.75rem; font-size: 0.75rem; }
+.sm { padding: 0.375rem 1rem; font-size: 0.875rem; }
+.md { padding: 0.5rem 1.5rem; font-size: 1rem; }
+.lg { padding: 0.625rem 2rem; font-size: 1.125rem; }
+.xl { padding: 0.75rem 2.5rem; font-size: 1.25rem; }
+
+.block { width: 100%; display: flex; }
+
+.loader {
+  display: inline-block;
+  margin-right: 10px;
+}

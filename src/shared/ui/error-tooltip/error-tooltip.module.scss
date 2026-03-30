@@ -1,0 +1,68 @@
+
+.errorTooltip {
+  position: absolute;
+  top: 100%;
+  left: $spacing-4;
+  z-index: 1000;
+  margin-top: $spacing-2;
+  padding: $spacing-1 $spacing-3;
+  
+  background-color: $bg-primary;
+  color: $danger;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+  border-radius: $radius-md;
+  box-shadow: $color-shadow;
+  border: 1px solid $danger;
+  
+  pointer-events: none;
+  user-select: none;
+  
+  // Базовое состояние - скрыто
+  opacity: 0;
+  visibility: hidden;
+  
+  // Анимация исчезновения
+  @include fade-out('top', 8px, $duration-fast, $ease-in);
+  // Задержка скрытия visibility до конца анимации
+  transition: visibility 0s linear $duration-fast;
+
+  &.visible {
+    visibility: visible;
+    pointer-events: auto;
+    
+    // Анимация появления
+    @include fade-in-up('top', 8px, $duration-fast, $ease-out);
+    // Показываем сразу
+    transition: visibility 0s linear 0s;
+  }
+
+  // Треугольник
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: $spacing-4;
+    
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid $danger;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: $spacing-4;
+    margin-bottom: -1px; // Чтобы перекрыть границу
+    
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid $bg-primary;
+  }
+}

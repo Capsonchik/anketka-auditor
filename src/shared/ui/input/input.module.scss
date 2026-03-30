@@ -1,0 +1,465 @@
+// =============================================
+// Input & Textarea Component Styles
+// Стили компонентов ввода
+// =============================================
+
+// =============================================
+// Wrapper
+// Обёртка компонента
+// =============================================
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+  width: fit-content;
+}
+
+.block {
+  width: 100%;
+}
+
+// =============================================
+// Label
+// Лейбл
+// =============================================
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $gray-900;
+  transition: color $transition-fast;
+}
+
+.floating {
+  // Стили для плавающего лейбла
+}
+
+.textareaLabel {
+  // Специфичные стили для лейбла textarea
+}
+
+// =============================================
+// Container
+// Контейнер input/textarea
+// =============================================
+
+.container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border-radius: $radius-md;
+  transition:
+    border-color $transition-fast,
+    box-shadow $transition-fast,
+    background-color $transition-fast;
+  position: relative;
+}
+
+.containerTextarea {
+  align-items: flex-start;
+
+  .textarea {
+    resize: var(--textarea-resize, vertical);
+    min-height: 100%;
+  }
+}
+
+// =============================================
+// Sizes
+// Размеры
+// =============================================
+
+.xs {
+  min-height: 32px;
+
+  .input,
+  .textarea {
+    padding: $spacing-1 $spacing-2;
+    font-size: $font-size-xs;
+  }
+
+  .leftIcon,
+  .rightIcon {
+    padding: $spacing-1;
+  }
+
+  .leftElement,
+  .rightElement {
+    padding: $spacing-1 $spacing-2;
+  }
+}
+
+.sm {
+  min-height: 36px;
+
+  .input,
+  .textarea {
+    padding: $spacing-2 $spacing-3;
+    font-size: $font-size-sm;
+  }
+
+  .leftIcon,
+  .rightIcon {
+    padding: $spacing-1;
+  }
+
+  .leftElement,
+  .rightElement {
+    padding: $spacing-2 $spacing-3;
+  }
+}
+
+.md {
+  min-height: 40px;
+
+  .input,
+  .textarea {
+    padding: $spacing-2 $spacing-3;
+    font-size: $font-size-base;
+  }
+
+  .leftIcon,
+  .rightIcon {
+    padding: $spacing-2;
+  }
+
+  .leftElement,
+  .rightElement {
+    padding: $spacing-2 $spacing-3;
+  }
+}
+
+.lg {
+  min-height: 44px;
+
+  .input,
+  .textarea {
+    padding: $spacing-3 $spacing-4;
+    font-size: $font-size-lg;
+  }
+
+  .leftIcon,
+  .rightIcon {
+    padding: $spacing-2;
+  }
+
+  .leftElement,
+  .rightElement {
+    padding: $spacing-3 $spacing-4;
+  }
+}
+
+.xl {
+  min-height: 48px;
+
+  .input,
+  .textarea {
+    padding: $spacing-3 $spacing-4;
+    font-size: $font-size-xl;
+  }
+
+  .leftIcon,
+  .rightIcon {
+    padding: $spacing-2;
+  }
+
+  .leftElement,
+  .rightElement {
+    padding: $spacing-3 $spacing-4;
+  }
+}
+
+// =============================================
+// Variants
+// Варианты отображения
+// =============================================
+
+.default {
+  background-color: $bg-primary;
+  border: 1px solid $gray-300;
+
+  &:hover:not(.disabled):not(.readOnly) {
+    border-color: $primary-500;
+  }
+}
+
+.filled {
+  background-color: $gray-100;
+  border: 1px solid transparent;
+
+  &:hover:not(.disabled):not(.readOnly) {
+    background-color: $gray-200;
+  }
+}
+
+.flushed {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid $gray-300;
+  border-radius: 0;
+
+  &:hover:not(.disabled):not(.readOnly) {
+    border-bottom-color: $primary-500;
+  }
+}
+
+.unstyled {
+  background-color: transparent;
+  border: none;
+  padding: 0 !important;
+}
+
+// =============================================
+// States
+// Состояния
+// =============================================
+
+.default {
+  &.focused {
+    border-color: $primary-500; 
+    box-shadow: 0 0 0 3px $primary-100;
+  }
+}
+
+.success {
+  &.default,
+  &.filled {
+    border-color: $success-500;
+  }
+
+  &.flushed {
+    border-bottom-color: $success-500;
+  }
+
+  &.focused {
+    border-color: $success-500;
+    box-shadow: 0 0 0 3px $success-100;
+  }
+}
+
+.error {
+  &.default,
+  &.filled {
+    border-color: $danger-500;   
+  }
+
+  &.flushed {
+    border-bottom-color: $danger-500;
+  }
+
+  &.focused {
+    border-color: $danger-500;
+    box-shadow: 0 0 0 3px $danger-100;
+  }
+}
+
+.warning {
+  &.default,
+  &.filled {
+    border-color: $warning-500;
+  }
+
+  &.flushed {
+    border-bottom-color: $warning-500;
+  }
+
+  &.focused {
+    border-color: $warning-500;
+    box-shadow: 0 0 0 3px $warning-100;   
+  }
+}
+
+// =============================================
+// Focus State
+// Состояние фокуса
+// =============================================
+
+.focused {
+  outline: none;
+
+  &.default {
+    border-color: $primary-500;
+    box-shadow: 0 0 0 3px $primary-200;
+  }
+}
+
+// =============================================
+// Disabled State
+// Состояние disabled
+// =============================================
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: $gray-100 !important;
+}
+
+// =============================================
+// ReadOnly State
+// Состояние readOnly
+// =============================================
+
+.readOnly {
+  background-color: $gray-100;
+  cursor: default;
+}
+
+// =============================================
+// Input & Textarea Base
+// Базовые стили input и textarea
+// =============================================
+
+.input,
+.textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: $gray-900;
+  font-family: inherit;
+  border-radius: inherit; // Наследуем скругление от контейнера
+
+  &::placeholder {
+    color: $gray-500;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.input {
+  width: 100%;
+
+  &::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &::-moz-number-spin-box {
+    display: none;
+  }
+}
+
+.colorInput {
+  width: 40px;
+  height: 100%;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border-radius: $radius-md;
+  }
+
+  &::-webkit-color-swatch {
+    border: none;
+    border-radius: $radius-md;
+  }
+
+  &::-moz-color-swatch {
+    border: none;
+    border-radius: $radius-md;
+  }
+}
+
+.textarea {
+  width: 100%;
+  min-height: 100px;
+  padding-top: $spacing-3;
+  padding-bottom: $spacing-3;
+}
+
+// =============================================
+// Left & Right Elements
+// Элементы слева и справа
+// =============================================
+
+.leftIcon,
+.rightIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $gray-500;
+  flex-shrink: 0;
+}
+
+.leftElement,
+.rightElement {
+  display: flex;
+  align-items: center;
+  color: $gray-500;
+  flex-shrink: 0;
+}
+
+.hasLeftElement {
+  .input,
+  .textarea {
+    padding-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+.hasRightElement {
+  .input,
+  .textarea {
+    padding-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+// =============================================
+// Clear Button
+// Кнопка очистки
+// =============================================
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: $spacing-1;
+  color: $gray-500;
+  border-radius: $radius-sm;
+  transition:
+    background-color $transition-fast,
+    color $transition-fast;
+
+  &:hover {
+    background-color: $gray-100;
+    color: $gray-900;
+  }
+}
+
+// =============================================
+// Hint
+// Подсказка
+// =============================================
+
+.hint {
+  font-size: $font-size-xs;
+  color: $gray-500;
+}
+
+.successHint {
+  color: $success-500;
+}
+
+.errorHint {
+  color: $danger-500;
+}
+
+.warningHint {
+  color: $warning-500;  
+}

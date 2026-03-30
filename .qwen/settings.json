@@ -1,0 +1,32 @@
+{
+  "project": {
+    "name": "bi-next-app-pattern",
+    "type": "nextjs",
+    "framework": "Next.js App Router",
+    "language": "TypeScript",
+    "packageManager": "npm"
+  },
+  "preferences": {
+    "outputLanguage": "Russian",
+    "codeStyle": {
+      "quotes": "single",
+      "semicolons": false,
+      "trailingComma": "es5"
+    },
+    "namingConvention": {
+      "files": "kebab-case",
+      "folders": "kebab-case",
+      "description": "Многословные названия через дефис, например: filter-item.tsx, filter-item.module.scss"
+    }
+  },
+  "context": {
+    "description": "Next.js application with App Router architecture",
+    "keyTechnologies": [
+      "Next.js 15+",
+      "React 19+",
+      "TypeScript",
+      "App Router"
+    ]
+  },
+  "$version": 3
+}

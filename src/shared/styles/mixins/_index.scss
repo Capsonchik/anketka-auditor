@@ -1,0 +1,16 @@
+// =============================================
+// Mixins Index
+// Главный файл импорта миксинов
+// =============================================
+
+// Fluid properties - адаптивные свойства
+@import './fluid';
+
+// Animations - анимации
+@import './animations';
+
+// Button animations - анимации кнопок
+@import './button-animations';
+
+// Scrollbar - кастомный скроллбар
+@import './scrollbar';

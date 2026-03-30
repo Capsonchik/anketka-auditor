@@ -1,0 +1,11 @@
+@use 'sass:map';
+@use '@shared/styles/mixins/color-shade' as shade;
+@forward '@shared/styles/colors/base' as base-*;
+@use '@shared/styles/colors/base' as base;
+
+/// Генерирует CSS переменные для всех цветов
+@mixin generate-all-palettes() {
+  @each $name, $color in base.$base-colors {
+    @include shade.generate-color-palette($color, $name);
+  }
+}

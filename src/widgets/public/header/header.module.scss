@@ -1,0 +1,93 @@
+.header {
+  height: $header-height;
+  background-color: $bg-primary;
+  border-bottom: 1px solid $border-color;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+.container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 $spacing-6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.desktopNav {
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+.themeToggle {
+  background: none;
+  border: 1px solid $gray-300;
+  color: $gray-950;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: $gray-100;
+    border-color: #ff7a00;
+  }
+}
+
+.loginBtn {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.burger {
+  display: none;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+
+  span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+  }
+
+  @media (max-width: 1024px) {
+    display: flex;
+  }
+
+  &:hover {
+    span {
+      background-color: #ff7a00;
+    }
+  }
+}

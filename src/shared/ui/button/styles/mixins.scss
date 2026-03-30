@@ -1,0 +1,21 @@
+@mixin size($width, $height: $width) {
+  width: $width;
+  height: $height;
+}
+
+@mixin absolute($top: null, $right: null, $bottom: null, $left: null) {
+  position: absolute;
+  top: $top;
+  right: $right;
+  bottom: $bottom;
+  left: $left;
+}
+
+// Вспомогательные функции для референса
+@function tint($color, $percentage: 50%) {
+  @return mix(white, $color, $percentage);
+}
+
+@function shade($color, $percentage: 50%) {
+  @return mix(black, $color, $percentage);
+}

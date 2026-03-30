@@ -1,0 +1,40 @@
+// =============================================
+// Fluid Properties Mixins
+// Адаптивные CSS свойства с плавным переходом
+// =============================================
+
+/**
+ * Миксин для адаптивных CSS свойств
+ *
+ * Создает адаптивные CSS свойства, которые автоматически изменяются
+ * от минимального значения (320px) до максимального (1920px+).
+ * Использует CSS функцию clamp() для плавного перехода между значениями.
+ *
+ * @param {string} $property - Название CSS свойства (font-size, padding, margin, width)
+ * @param {number} $max-value - Максимальное значение для 1920px
+ * @param {number} $min-value - Минимальное значение для 320px
+ *
+ * @example
+ * // Адаптивный размер шрифта
+ * .my-component {
+ *   @include fluid-property(font-size, 24px, 16px);
+ * }
+ *
+ * @example
+ * // Адаптивный padding
+ * .container {
+ *   @include fluid-property(padding, 64px, 16px);
+ * }
+ */
+@mixin fluid-property($property, $max-value, $min-value) {
+  $min-viewport: 320px;
+  $max-viewport: 1920px;
+  $viewport-range: $max-viewport - $min-viewport;
+  $value-range: $max-value - $min-value;
+
+  #{$property}: clamp(
+    #{$min-value},
+    #{$min-value} + #{$value-range} * ((100vw - #{$min-viewport}) / #{$viewport-range}),
+    #{$max-value}
+  );
+}

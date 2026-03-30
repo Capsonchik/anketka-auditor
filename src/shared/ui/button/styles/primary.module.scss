@@ -1,0 +1,15 @@
+.button {
+  background-color: var(--btn-color, var(--primary-500));
+  color: var(--gray-50);
+  border: none;
+  font-weight: 600;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    background-color: var(--btn-hover-color, var(--primary-600));
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--btn-active-color, var(--primary-700));
+  }
+}

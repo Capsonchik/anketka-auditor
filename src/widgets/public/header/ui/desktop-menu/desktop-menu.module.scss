@@ -1,0 +1,116 @@
+.nav {
+  display: flex;
+  align-items: center;
+  gap: $spacing-6;
+}
+
+.dropdownContainer {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    .dropdownMenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .arrowIcon {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.link {
+  color: $text-secondary;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+
+  &:hover, &.active {
+    color: $primary-500;
+  }
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  color: inherit;
+}
+
+.arrowIcon {
+  transition: transform 0.2s ease;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: $bg-primary;
+  border: 1px solid $gray-200;
+  border-radius: $radius-lg;
+  padding: $spacing-4;
+  min-width: 240px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: $color-shadow;
+}
+
+.megaMenu {
+  width: auto;
+  min-width: 300px;
+}
+
+.megaMenuColumns {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.megaMenuColumn {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.columnTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $gray-400; 
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: $spacing-1;
+}
+
+.menuItem {
+  color: $gray-600;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: $spacing-2;
+  border-radius: $radius-md;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+
+  &:hover {
+    background-color: $gray-100;
+    color: $primary-500;  
+  }
+}
+
+.menuItemIcon {
+  display: flex;
+  align-items: center;
+  color: $primary-500;
+}

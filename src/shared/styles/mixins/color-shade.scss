@@ -1,0 +1,31 @@
+@use 'sass:color';
+
+/// Генерирует оттенок от базового цвета
+/// @param {Color} $base - Базовый цвет
+/// @param {Number} $level - Уровень (100-900)
+/// @return {Color} Цвет оттенка
+@function generate-shade($base, $level) {
+  @if $level == 500 {
+    @return $base;
+  } @else if $level < 500 {
+    // Светлее (100-400)
+    $lightness-step: (500 - $level) / 500 * 40%;
+    @return color.adjust($base, $lightness: $lightness-step);
+  } @else {
+    // Темнее (600-900)
+    $darkness-step: ($level - 500) / 500 * 40%;
+    @return color.adjust($base, $lightness: -$darkness-step);
+  }
+}
+
+/// Создаёт палитру оттенков для цвета
+/// @param {Color} $base - Базовый цвет
+/// @param {String} $name - Имя цвета (primary, secondary...)
+@mixin generate-color-palette($base, $name) {
+  @for $i from 1 through 9 {
+    $level: $i * 100;
+    --#{$name}-#{$level}: #{generate-shade($base, $level)};
+  }
+  --#{$name}-50: #{color.adjust($base, $lightness: 45%)};
+  --#{$name}-950: #{color.adjust($base, $lightness: -45%)};
+}

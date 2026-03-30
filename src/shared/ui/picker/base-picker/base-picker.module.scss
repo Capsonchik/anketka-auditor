@@ -1,0 +1,269 @@
+// =============================================
+// Base Picker Styles
+// Базовые стили для пикеров
+// =============================================
+
+.container {
+  position: relative;
+  display: inline-block;
+  width: 224px;
+  
+  &.block {
+    display: block;
+    width: 100%;
+  }
+}
+
+.trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 1px solid $gray-300;
+  background-color: $bg-primary;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: all $transition-fast;
+  color: $gray-900;
+  outline: none;
+  user-select: none;
+  
+  &:hover:not(.disabled) {
+    border-color: $primary-500;
+  }
+  
+  &.active {
+    border-color: $primary-500;
+    box-shadow: 0 0 0 3px $primary-200;
+  }
+  
+  &.disabled {
+    background-color: $gray-100;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  &.error {
+    border-color: $danger-500;
+    
+    &.active {
+      box-shadow: 0 0 0 3px $danger-100;    
+    }
+  }
+}
+
+// Sizes
+.xs {
+  min-height: 32px;
+  padding: $spacing-1 $spacing-2;
+  font-size: $font-size-xs;
+}
+
+.sm {
+  min-height: 36px;
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+}
+
+.md {
+  min-height: 40px;
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-base;
+}
+
+.lg {
+  min-height: 44px;
+  padding: $spacing-3 $spacing-4;
+  font-size: $font-size-lg;
+}
+
+.xl {
+  min-height: 48px;
+  padding: $spacing-3 $spacing-4;
+  font-size: $font-size-xl;
+}
+
+.value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  
+  &.placeholder {
+    color: $gray-500;
+  }
+}
+
+.indicators {
+  display: flex;
+  align-items: center;
+  gap: $spacing-1;
+  margin-left: $spacing-2;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $gray-500;
+  
+  &.loading {
+    animation: spin 1s linear infinite;
+  }
+}
+
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  color: $gray-500; 
+  transition: all $transition-fast;
+  
+  &:hover {
+    background-color: $gray-100;
+    color: $gray-900;
+  }
+}
+
+// Dropdown
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  margin-top: $spacing-1;
+  background-color: $bg-primary;
+  border: 1px solid $gray-300;  
+  border-radius: $radius-md;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+.search {
+  padding: $spacing-2;
+  border-bottom: 1px solid $gray-300;
+}
+
+.searchInput {
+  width: 100%;
+  padding: $spacing-1 $spacing-2;
+  border: 1px solid $gray-300;
+  border-radius: $radius-sm;
+  background-color: $bg-primary;
+  color: $gray-900;
+  font-size: $font-size-sm;
+  outline: none;
+  
+  &:focus {
+    border-color: $primary-500;
+  }
+}
+
+.menu {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: $spacing-1 0;
+  
+  // Use scrollbar mixin if available or standard styles
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: $gray-300;
+    border-radius: $radius-full;
+  }
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-2 $spacing-3;
+  cursor: pointer;
+  font-size: $font-size-base;
+  color: $gray-900;
+  transition: background-color $transition-fast;
+  
+  &:hover:not(.disabled) {
+    background-color: $gray-100;
+  }
+  
+  &.selected {
+    background-color: $primary-100;
+    color: $primary-500;  
+    font-weight: $font-weight-medium;
+  }
+  
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid $gray-300;
+  border-radius: $radius-sm;
+  transition: all $transition-fast;
+  
+  &.checked {
+    background-color: $primary-500;
+    border-color: $primary-500;
+    color: $gray-50;
+  }
+}
+
+.empty {
+  padding: $spacing-3;
+  text-align: center;
+  color: $gray-500;
+  font-size: $font-size-sm;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hiddenSelect {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
