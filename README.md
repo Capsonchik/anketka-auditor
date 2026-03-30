@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 ROMIR BI — Next App Pattern
 
-## Getting Started
+Современный шаблон корпоративного приложения на базе **Next.js**, построенный с использованием методологии **Feature-Sliced Design (FSD)**. Проект включает в себя продвинутую UI-библиотеку, динамическую систему тем и встроенную документацию.
 
-First, run the development server:
+---
+
+## ⚡ Быстрый старт
+
+Запустите все сервисы (Приложение, Storybook и Документацию) одной командой:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run all
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Сервис | URL | Порт |
+| :--- | :--- | :--- |
+| **Приложение (Dev)** | [http://localhost:3002](http://localhost:3002) | `3002` |
+| **Storybook** | [http://localhost:6006](http://localhost:6006) | `6006` |
+| **Документация** | [http://localhost:4002](http://localhost:4002) | `4002` |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏗 Архитектура (FSD)
 
-## Learn More
+Проект строго следует правилам **Feature-Sliced Design**. Каждый слой имеет свою зону ответственности:
 
-To learn more about Next.js, take a look at the following resources:
+- `app/` — глобальная инициализация: провайдеры, стили, шрифты и макеты (Next.js App Router).
+- `widgets/` — крупные блоки страницы (Header, Hero, Charts).
+- `features/` — действия пользователя (ColorPicker, ThemeToggle, LoginForm).
+- `entities/` — бизнес-логика и сущности (User, Auth).
+- `shared/` — переиспользуемые модули (UI Kit, Hooks, API, Libs).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🎨 UI-библиотека & Дизайн-система
 
-## Deploy on Vercel
+В проекте реализован мощный набор UI-компонентов, вдохновленный *React Suite*, но с расширенными возможностями анимации.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Ключевые компоненты:
+- **Button**: 14 видов продвинутых анимаций, 5 размеров, 6 цветовых схем и 3 стиля отображения (`default`, `ghost`, `subtile`).
+- **Input & PhoneInput**: полная поддержка масок стран СНГ и автоопределение страны по коду.
+- **PillSwitchFlexible**: переключатель с "умным" анимированным индикатором.
+- **Logo**: официальный адаптивный логотип РОМИР с поддержкой тем.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Динамические темы:
+- **ThemeToggle**: плавное переключение между светлой и темной темами.
+- **ColorPicker**: позволяет менять основной цвет приложения (`primary`) на лету. Система автоматически рассчитывает необходимые оттенки для теней и анимаций.
+
+---
+
+## 🌍 Интернационализация (i18n)
+
+В проекте реализована система автоматической экстракции и перевода текстов на базе **i18next**.
+
+### Как работать с переводами:
+1.  **В коде**: Используйте хук `useTranslation` и функцию `t()` для оборачивания текста:
+    ```tsx
+    const { t } = useTranslation();
+    return <h1>{t('Заголовок страницы')}</h1>;
+    ```
+2.  **Сбор ключей**: Запустите `npm run i18n:extract`. Скрипт просканирует `src/` и добавит все новые фразы в `messages/ru.json`.
+3.  **Авто-перевод**: Запустите `npm run i18n:translate`. Скрипт автоматически создаст переводы в `messages/en.json` для всех новых ключей.
+
+### Скрипты i18n:
+- `npm run i18n:extract` — извлечь новые тексты из исходного кода в JSON.
+- `npm run i18n:translate` — автоматически перевести новые ключи на английский язык.
+
+---
+
+## 🛠 Технологический стек
+
+- **Frontend**: [Next.js 16](https://nextjs.org), [React 19](https://reactjs.org)
+- **Язык**: [TypeScript](https://www.typescriptlang.org)
+- **Стилизация**: [Sass (SCSS)](https://sass-lang.com) + CSS Modules
+- **Состояние**: [Redux Toolkit](https://redux-toolkit.js.org)
+- **Формы**: React Hook Form + Yup
+- **Документация**: [Docusaurus](https://docusaurus.io) & [Storybook](https://storybook.js.org)
+
+---
+
+## 📖 Документация и правила
+
+Для поддержания качества кода и единообразия структуры используйте:
+- **[Docusaurus](http://localhost:4002)** — полные гайды по архитектуре, UI-компонентам и фичам.
+- **[Storybook](http://localhost:6006)** — песочница компонентов и техническое описание их свойств.
+
+### Скрипты
+- `npm run dev` — запуск только приложения.
+- `npm run storybook` — запуск Storybook.
+- `npm run docs` — запуск документации.
+- `npm run lint` — проверка качества кода.
+
+---
+
+© 2026 ROMIR BI Team
