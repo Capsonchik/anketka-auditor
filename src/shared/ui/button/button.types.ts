@@ -12,6 +12,8 @@ export type ButtonVariant =
 
 export type ButtonAppearance = 'default' | 'subtile' | 'ghost';
 
+export type ButtonRounded = 'none' | 'sm' | 'md' | 'lg' | 'full';
+
 export type ButtonAnimation =
   | 'none'
   | 'swipe'
@@ -33,6 +35,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   variant?: ButtonVariant;
   appearance?: ButtonAppearance;
+  rounded?: ButtonRounded;
   animation?: ButtonAnimation;
   block?: boolean;
   loading?: boolean;

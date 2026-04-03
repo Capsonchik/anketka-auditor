@@ -17,6 +17,7 @@ const meta = {
 - **5 размеров**: xs, sm, md, lg, xl
 - **3 стиля (appearance)**: default, subtile, ghost
 - **6 цветов (variant)**: default, primary, success, warning, danger, info
+- **5 видов скругления**: none, sm, md, lg, full
 - **14 анимаций**: none, swipe, diagonal-swipe, double-swipe, diagonal-close, zoning-in, four-corners, slice, position-aware, alternate, smoosh, vertical-overlap, horizontal-overlap, collision, ripple
 - **Иконки**: поддержка leftIcon и rightIcon
 - **Состояния**: loading, disabled, active, block
@@ -51,6 +52,14 @@ const meta = {
       description: 'Внешний вид кнопки',
       table: {
         defaultValue: { summary: 'default' },
+      },
+    },
+    rounded: {
+      control: 'select',
+      options: ['none', 'sm', 'md', 'lg', 'full'],
+      description: 'Скругление углов',
+      table: {
+        defaultValue: { summary: 'none' },
       },
     },
     animation: {
@@ -326,6 +335,22 @@ export const IconOnly: Story = {
       <Button variant="success" aria-label="Confirm">
         <CheckIcon />
       </Button>
+    </div>
+  ),
+};
+
+// =============================================
+// Rounded Stories
+// =============================================
+
+export const RoundedVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+      <Button rounded="none" variant="primary">Rounded None</Button>
+      <Button rounded="sm" variant="primary">Rounded SM</Button>
+      <Button rounded="md" variant="primary">Rounded MD</Button>
+      <Button rounded="lg" variant="primary">Rounded LG</Button>
+      <Button rounded="full" variant="primary">Rounded Full</Button>
     </div>
   ),
 };

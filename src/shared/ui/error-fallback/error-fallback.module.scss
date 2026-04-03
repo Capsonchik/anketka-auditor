@@ -1,0 +1,61 @@
+
+
+.errorFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.container {
+  max-width: 500px;
+  text-align: center;
+}
+
+.title {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.message {
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.detailsWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.detailsButton {
+  font-size: 0.875rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.modal {
+  max-width: 600px;
+}
+
+.errorStack {
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: var(--status-error);
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+}

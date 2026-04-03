@@ -11,6 +11,7 @@ import { PresentationConstructor } from '@widgets/public/landing/presentation/pr
 import { ScrollToTop } from '@shared/ui/scroll-to-top/scroll-to-top';
 
 export default function HomePage() {
+
   return (
     <>
       <ScrollToTop />

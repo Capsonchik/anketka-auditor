@@ -9,3 +9,4 @@ export * from './modal';
 export * from './logo';
 export * from './scroll-to-top';
 export * from './scroll-reveal';
+export * from './error-fallback';

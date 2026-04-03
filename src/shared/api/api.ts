@@ -25,19 +25,10 @@ export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL,
-    prepareHeaders: async (headers) => {
+    prepareHeaders: (headers) => {
       let token;
 
-      if (typeof window === 'undefined') {
-        try {
-          // На сервере (Next.js 13+ App Router)
-          const { cookies } = await import('next/headers');
-          const cookieStore = await cookies();
-          token = cookieStore.get('accessToken')?.value;
-        } catch (error) {
-          console.error('Error reading cookies on server:', error);
-        }
-      } else {
+      if (typeof window !== 'undefined') {
         // На клиенте
         token = document?.cookie
           ?.split('; ')

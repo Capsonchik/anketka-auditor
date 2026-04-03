@@ -9,8 +9,9 @@ import type { ButtonProps } from './button.types';
 
 export const Button: React.FC<ButtonProps> = ({
   size = 'md',
-  variant = 'default',
   appearance = 'default',
+  rounded = 'none',
+  variant = 'default',
   animation = 'none',
   loading = false,
   block = false,
@@ -94,6 +95,7 @@ export const Button: React.FC<ButtonProps> = ({
       className={clsx(
         styles.button,
         styles[size],
+        styles[`rounded-${rounded}`],
         styles[`variant-${variant}`],
         styles[`appearance-${appearance}`],
         animation !== 'none' && styles.hasAnimation,

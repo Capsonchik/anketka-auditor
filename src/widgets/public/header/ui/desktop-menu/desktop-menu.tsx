@@ -23,7 +23,7 @@ export const DesktopMenu = () => {
     return pathname?.startsWith(path)
   }
 
-  const isParentActive = (item: MenuItemConfig) => {
+  const isParentActive = (item: MenuItemConfig): boolean => {
     if (item.route && isActive(item.route)) return true
     if (item.items) {
       return item.items.some((sub: MenuItemConfig) => isParentActive(sub))

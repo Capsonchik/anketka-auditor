@@ -7,7 +7,9 @@ import {
   applyTheme,
   storeTheme,
   subscribeToSystemThemeChange,
-} from '../lib/theme';
+  getStoredPrimaryColor,
+  applyPrimaryColor,
+} from '@shared/lib/theme';
 
 export interface ThemeProviderProps {
   children: React.ReactNode;
@@ -53,7 +55,7 @@ export function ThemeProvider({
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [mounted, setMounted] = useState(false);
 
-  // Initialize theme on mount (SSR safe)
+  // Initialize theme and primary color on mount (SSR safe)
   useEffect(() => {
     const stored = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
     const initialTheme = (stored as Theme) || (enableSystem ? 
@@ -62,6 +64,11 @@ export function ThemeProvider({
     
     setThemeState(initialTheme);
     applyTheme(initialTheme);
+
+    // Подгружаем и применяем сохраненный цвет
+    const storedColor = getStoredPrimaryColor();
+    applyPrimaryColor(storedColor);
+
     setMounted(true);
   }, [defaultTheme, enableSystem, storageKey]);
 

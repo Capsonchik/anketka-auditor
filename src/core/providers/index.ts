@@ -1,1 +1,5 @@
-export { StoreProvider } from './store-provider' 
+export { StoreProvider } from './store-provider'
+export { ErrorBoundaryProvider } from './error-boundary-provider'
+export { ThemeProvider, useTheme } from './theme-provider'
+export type { Theme } from '@shared/lib/theme'
+export { I18nProvider } from './i18n-provider'

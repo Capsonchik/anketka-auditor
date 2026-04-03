@@ -53,7 +53,7 @@ export const Solutions = () => {
                 <li>Возможность выгружать данные</li>
                 <li>Доступная цена отчета</li>
               </ul>
-              <Button variant="primary" appearance="primary">Создать анализ</Button>
+              <Button variant="primary" appearance="default">Создать анализ</Button>
             </div>
             <div className={styles.cardVisual}></div>
           </div>

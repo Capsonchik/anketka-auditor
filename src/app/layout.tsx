@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { StoreProvider } from '@core/providers'
+import { ErrorBoundaryProvider, StoreProvider, ThemeProvider } from '@core/providers'
 import { I18nProvider } from '@core/providers/i18n-provider'
-import { ThemeProvider } from '@shared/hooks/ThemeProvider'
 import { montserrat, openSans } from '@shared/config/fonts'
 
 export const metadata: Metadata = {
@@ -18,13 +17,16 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="ru" className={`${montserrat.variable} ${openSans.variable}`}>
       <body>
-        <StoreProvider>
-          <I18nProvider>
-            <ThemeProvider defaultTheme="dark">
-              {children}
-            </ThemeProvider>
-          </I18nProvider>
-        </StoreProvider>
+        <ErrorBoundaryProvider>
+          <StoreProvider>
+            <I18nProvider>
+              <ThemeProvider defaultTheme="dark">
+                {children}
+              </ThemeProvider>
+            </I18nProvider>
+          </StoreProvider>
+        </ErrorBoundaryProvider>
+
       </body>
     </html>
   )

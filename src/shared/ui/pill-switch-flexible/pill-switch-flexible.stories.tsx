@@ -22,6 +22,7 @@ const meta = {
     disabled: {
       control: 'boolean',
     },
+    onChange: { action: 'changed' },
   },
 } satisfies Meta<typeof PillSwitchFlexible>;
 
@@ -66,6 +67,7 @@ export const Default: Story = {
     data: sampleData,
     value: 'week',
     name: 'period',
+    onChange: () => {},
   },
 };
 
@@ -76,6 +78,7 @@ export const Small: Story = {
     value: 'week',
     size: 'small',
     name: 'period-small',
+    onChange: () => {},
   },
 };
 
@@ -86,6 +89,7 @@ export const Large: Story = {
     value: 'week',
     size: 'large',
     name: 'period-large',
+    onChange: () => {},
   },
 };
 
@@ -96,6 +100,7 @@ export const Success: Story = {
     value: 'month',
     variant: 'success',
     name: 'period-success',
+    onChange: () => {},
   },
 };
 
@@ -106,6 +111,7 @@ export const Danger: Story = {
     value: 'year',
     variant: 'danger',
     name: 'period-danger',
+    onChange: () => {},
   },
 };
 
@@ -115,6 +121,7 @@ export const WithIcons: Story = {
     data: dataWithIcons,
     value: 'cards',
     name: 'view',
+    onChange: () => {},
   },
 };
 
@@ -124,6 +131,7 @@ export const WithDisabledOptions: Story = {
     data: dataWithDisabled,
     value: 'active',
     name: 'filter',
+    onChange: () => {},
   },
 };
 
@@ -134,6 +142,7 @@ export const Disabled: Story = {
     value: 'day',
     disabled: true,
     name: 'period-disabled',
+    onChange: () => {},
   },
 };
 
@@ -143,6 +152,6 @@ export const CustomClassName: Story = {
     data: sampleData,
     value: 'month',
     className: 'my-custom-class',
-    name: 'period-custom',
+    onChange: () => {},
   },
 };

@@ -1,0 +1,182 @@
+
+
+.page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-12;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(
+    135deg,
+    $bg-primary 0%,
+    $bg-secondary 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc($spacing-12 * 2);
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  
+  // Исправлено: порядок аргументов согласно миксину (from, distance, duration, easing)
+  @include fade-in-up('bottom', 30px, 0.5s);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-6;
+  width: 100%;
+}
+
+.errorCode {
+  font-weight: 700;
+  line-height: 1;
+  color: $primary-500; // Fallback color
+  background: linear-gradient(
+    135deg,
+    $primary-500 0%,
+    $primary-700 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  animation: pulse 2s ease-in-out infinite;
+  
+  @include fluid-property(font-size, 120px, 80px);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.title {
+  margin: 0;
+  font-weight: 600;
+  color: $text-primary;
+  line-height: 1.2;
+  @include fluid-property(font-size, 32px, 24px);
+}
+
+.message {
+  margin: 0;
+  color: $text-secondary;
+  line-height: 1.6;
+  max-width: 500px;
+  @include fluid-property(font-size, 18px, 16px);
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-4;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: $spacing-4;
+}
+
+.illustration {
+  position: absolute; // Сделаем фоновой анимацией
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  max-width: 800px;
+  max-height: 600px;
+  opacity: 0.15; // Сделаем чуть менее прозрачной, но теперь она фоновая
+  pointer-events: none;
+  z-index: -1;
+}
+
+.illustrationCircle {
+  position: absolute;
+  border-radius: 50%;
+  background: $primary-500;
+  animation: float 10s ease-in-out infinite;
+  
+  &:nth-child(1) {
+    width: 150px;
+    height: 150px;
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+  }
+  
+  &:nth-child(2) {
+    width: 250px;
+    height: 250px;
+    top: 40%;
+    right: 5%;
+    animation-delay: 3s;
+  }
+  
+  &:nth-child(3) {
+    width: 100px;
+    height: 100px;
+    bottom: 15%;
+    left: 20%;
+    animation-delay: 6s;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  66% {
+    transform: translateY(10px) translateX(-10px);
+  }
+}
+
+// Адаптивность для мобильных устройств
+@media (max-width: 768px) {
+  .container {
+    gap: $spacing-12;
+  }
+  
+  .illustration {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .illustrationCircle {
+    &:nth-child(1) {
+      width: 60px;
+      height: 60px;
+    }
+    
+    &:nth-child(2) {
+      width: 90px;
+      height: 90px;
+    }
+    
+    &:nth-child(3) {
+      width: 45px;
+      height: 45px;
+    }
+  }
+}

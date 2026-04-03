@@ -50,7 +50,7 @@ export const PresentationConstructor = () => {
               </li>
             </ul>
             <div className={styles.actions}>
-              <Button variant="primary" appearance="primary">Попробовать конструктор</Button>
+              <Button variant="primary" appearance="default">Попробовать конструктор</Button>
             </div>
           </div>
         </div>

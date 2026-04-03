@@ -14,6 +14,7 @@ export const montserrat = Montserrat({
   weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-montserrat',
+  preload: false,
 });
 
 /**
@@ -26,4 +27,5 @@ export const openSans = Open_Sans({
   weight: ['400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-open-sans',
+  preload: false,
 });
