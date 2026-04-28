@@ -1,53 +1,52 @@
-'use client';
-
-
-import { Button } from '@shared/ui';
-
+import React from 'react';
+import { ButtonLink, Container } from '@/shared/ui';
+import { LandingHeroCards } from './landing-hero-cards';
 import styles from './hero.module.scss';
-import { useTranslation } from 'react-i18next';
 
-export const Hero = () => {
-  const { t } = useTranslation();
+const metrics = [
+  { value: '>90', label: 'постоянных клиентов' },
+  { value: '>15 000', label: 'активных пользователей' },
+] as const;
+
+export function Hero() {
   return (
-    <section id="hero" className={styles.hero}>
-
-      <div className={styles.container}>
-        <div className={styles.content}>
-          <h1 className={styles.title}>
-            {t('РОМИР')} <span className={styles.accent}>{t('BI')}</span>
-          </h1>
-          <h2 className={styles.subtitle}>
-            {t('Принимайте решения на основе ')}<span className={styles.highlight}>{t('данных')}</span>
-          </h2>
-          <p className={styles.description}>
-            {t('Единая платформа для работы с маркетинговыми данными.')}
-            {t('От готовых категорийных отчетов до глубокой кастомной аналитики.')}
+    <section id="hero" className={styles.section}>
+      <Container className={styles.container}>
+        <div className={styles.left}>
+          <div className={styles.kicker}>Анкетирование населения</div>
+          <h1 className={styles.title}>Спокойный сервис для опросов и отчётности</h1>
+          <p className={styles.subtitle}>
+            Онлайн-платформа с инструментами для сбора данных, проверки качества и анализа результатов.
           </p>
-          <div className={styles.actions}>
-            <Button animation="swipe" size="lg">Swipe</Button>
-            <Button animation="diagonal-swipe" size="lg" variant='primary' appearance='subtile'>Diagonal Swipe</Button>
-            <Button animation="double-swipe" size="lg" variant='primary' appearance='subtile'>Double Swipe</Button>
-            <Button animation="diagonal-close" size="lg" variant='primary' appearance='subtile'>Diagonal Close</Button>
-            <Button animation="zoning-in" size="lg" variant='primary' appearance='subtile'>Zoning In</Button>
-            <Button animation="four-corners" size="lg" variant='primary' appearance='subtile'>4 Corners</Button>
+
+          <div className={styles.metrics}>
+            {metrics.map((m) => (
+              <div key={m.value} className={styles.metric}>
+                <div className={styles.metricValue}>{m.value}</div>
+                <div className={styles.metricLabel}>{m.label}</div>
+              </div>
+            ))}
           </div>
-          <div className={styles.actions} style={{marginTop: 20}}>
-            <Button animation="slice" size="lg" variant='primary' appearance='subtile'>Slice</Button>
-            <Button animation="position-aware" size="lg" variant='primary' appearance='subtile'>Position Aware</Button>
-            <Button animation="alternate" size="lg" variant='primary' appearance='subtile'>Alternate</Button>
-            <Button animation="smoosh" size="lg" variant='primary' appearance='subtile'>Smoosh</Button>
-       
+
+          <div className={styles.ctas}>
+            <ButtonLink href="/tariffs" variant="primary">
+              Получить консультацию
+            </ButtonLink>
+            <ButtonLink href="/projects" variant="secondary">
+              Посмотреть примеры
+            </ButtonLink>
           </div>
-          <div className={styles.actions} style={{marginTop: 20}}>
-            <Button animation="vertical-overlap" size="lg" variant='primary' appearance='subtile'>Vertical Overlap</Button>
-            <Button animation="horizontal-overlap" size="lg" variant='primary' appearance='ghost'>Horizontal Overlap</Button>
-            <Button animation="collision" size="lg" variant='primary' appearance='ghost'>Collision</Button>
-          </div>
-          <div className={styles.actions} style={{marginTop: 20}}>
-            <Button animation="ripple" size="lg">Ripple</Button>
+
+          <div className={styles.stores} aria-label="Доступно в магазинах приложений">
+            <div className={styles.storeChip}>Google Play</div>
+            <div className={styles.storeChip}>App Store</div>
           </div>
         </div>
-      </div>
+
+        <div className={styles.right} aria-hidden="true">
+          <LandingHeroCards />
+        </div>
+      </Container>
     </section>
   );
-};
+}

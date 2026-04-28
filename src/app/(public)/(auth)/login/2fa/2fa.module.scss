@@ -1,0 +1,79 @@
+.twofa {
+  display: flex;
+  flex-direction: column;
+  @include fade-in-up('bottom', 10px, 0.4s);
+  width: 100%;
+  max-width: 480px;
+}
+
+.title {
+  @include fluid-property('font-size', 28px, 24px);
+  font-weight: 900;
+  color: $text-primary;
+  margin: 0 0 $spacing-2;
+}
+
+.subtitle {
+  @include fluid-property('font-size', 15px, 14px);
+  color: $text-secondary;
+  font-weight: 600;
+  margin: 0 0 $spacing-8;
+}
+
+.codeInputs {
+  display: flex;
+  gap: $spacing-3;
+  justify-content: space-between;
+  margin-bottom: $spacing-8;
+}
+
+.codeInput {
+  width: 52px;
+  height: 52px;
+  border-radius: $radius-lg;
+  border: 1px solid $border-color;
+  background: $bg-secondary;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: $text-primary;
+  transition: all 150ms ease;
+  caret-color: $primary;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.15);
+    background: $bg-primary;
+  }
+
+  &::placeholder {
+    color: $text-secondary;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-4;
+}
+
+.backBtn {
+  flex: 1;
+  height: 52px;
+  font-weight: 800;
+  text-transform: none;
+}
+
+.confirmBtn {
+  flex: 1.5;
+  height: 52px;
+  font-weight: 800;
+  text-transform: none;
+}
+
+.error {
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-bottom: $spacing-4;
+  font-weight: 600;
+}

@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryApi } from '@reduxjs/toolkit/query'
 
-const API_URL =  'https://dev.bi.romir.ru/back'
+const API_URL = '/api/proxy'
 
 /**
  * Базовый API для взаимодействия с бэкендом
@@ -26,25 +26,10 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL,
     prepareHeaders: (headers) => {
-      let token;
-
-      if (typeof window !== 'undefined') {
-        // На клиенте
-        token = document?.cookie
-          ?.split('; ')
-          ?.find(row => row.startsWith('accessToken='))
-          ?.split('=')[1];
-      }
-      
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`)
-      }
-      
       headers.set('Accept', 'application/json')
-      
       return headers
     },
   }),
-  tagTypes: ['User', 'Auth'],
+  tagTypes: ['User', 'Auth', 'Assignments'],
   endpoints: () => ({}),
 })

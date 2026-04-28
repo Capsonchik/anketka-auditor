@@ -39,22 +39,28 @@ export const MENU_CONFIG: MenuItemConfig[] = [
             icon: <SummaryIcon width={18} height={18} />,
           },
           {
-            id: 'solutions-anchor',
-            label: 'Инструменты',
-            route: '/#solutions',
+            id: 'variants',
+            label: 'Варианты проектов',
+            route: '/#variants',
             icon: <ProjectsListIcon width={18} height={18} />,
           },
           {
-            id: 'features',
-            label: 'Преимущества',
-            route: '/#features',
+            id: 'manage',
+            label: 'Управление',
+            route: '/#manage',
             icon: <PaymentIcon width={18} height={18} />,
           },
           {
-            id: 'methodology',
-            label: 'Методология',
-            route: '/#methodology',
+            id: 'testimonials',
+            label: 'Отзывы',
+            route: '/#testimonials',
             icon: <DemographyIcon width={18} height={18} />,
+          },
+          {
+            id: 'tariffs',
+            label: 'Тарифы',
+            route: '/#tariffs',
+            icon: <PaymentIcon width={18} height={18} />,
           }
         ]
       }
@@ -64,6 +70,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     id: 'solutions',
     label: 'Решения',
     icon: <ProductIcon width={20} height={20} />,
+    hidden: true,
     items: [
       {
         id: 'products',

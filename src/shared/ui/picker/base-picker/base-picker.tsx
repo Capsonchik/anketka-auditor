@@ -3,7 +3,7 @@
 
 
 import React, { useState, useRef, useMemo } from 'react';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import { useClickOutside } from '@shared/lib/hooks/useClickOutside';
 import { ErrorTooltip } from '../../error-tooltip';
 import { BasePickerProps, PickerItem } from '../types';

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { LogoIcon } from '@shared/icons'
 import styles from './logo.module.scss'
-import clsx from 'clsx'
+import { clsx } from '@shared/lib/clsx'
 
 export interface LogoProps {
   className?: string

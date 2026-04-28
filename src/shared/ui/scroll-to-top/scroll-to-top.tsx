@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import styles from './scroll-to-top.module.scss';
 
 /**

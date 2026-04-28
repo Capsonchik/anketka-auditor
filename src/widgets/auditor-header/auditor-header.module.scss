@@ -1,0 +1,108 @@
+
+
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: $spacing-4;
+  border-bottom: 1px solid $border-color;
+  margin-bottom: $spacing-5;
+  @include fade-in-up('top', 10px, 0.4s);
+
+  .logo {
+    font-weight: $font-weight-bold;
+    @include fluid-property(font-size, 24px, 20px);
+    letter-spacing: 0.04em;
+    color: $primary;
+  }
+
+  .userInfo {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    padding: $spacing-1 $spacing-3;
+    border-radius: $radius-full;
+    background-color: $bg-secondary;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-2;
+    transition: all $transition-normal;
+  }
+
+  .profileClickArea {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: $spacing-1 0;
+
+    &:hover {
+      color: $text-primary;
+    }
+  }
+}
+
+.switchContainer {
+  display: inline-flex;
+  align-items: center;
+  margin-left: $spacing-4;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  vertical-align: middle;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $gray-300;
+  transition: $transition-slow;
+  border-radius: $radius-full;
+
+  &:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: $bg-primary;
+    transition: $transition-slow;
+    border-radius: $radius-full;
+  }
+}
+
+.switch input:checked + .slider {
+  background-color: $success;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.statusText {
+  margin-left: $spacing-2;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  color: $warning;
+
+  &.online {
+    color: $success;
+  }
+}
+
+
+

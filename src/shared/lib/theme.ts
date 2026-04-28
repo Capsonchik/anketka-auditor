@@ -1,9 +1,11 @@
 export type Theme = 'light' | 'dark';
 
 const THEME_STORAGE_KEY = 'app-theme';
-const COLOR_STORAGE_KEY = 'app-primary-color';
+const PRIMARY_COLOR_STORAGE_KEY = 'app-primary-color';
+const SECONDARY_COLOR_STORAGE_KEY = 'app-secondary-color';
 const THEME_ATTRIBUTE = 'data-theme';
-const DEFAULT_PRIMARY_COLOR = '#ff8200';
+const DEFAULT_PRIMARY_COLOR = '#42aaff';
+const DEFAULT_SECONDARY_COLOR = '#77dde7';
 
 /**
  * Get system preferred theme (based on OS preference)
@@ -33,7 +35,15 @@ export function getStoredTheme(): Theme | null {
  */
 export function getStoredPrimaryColor(): string {
   if (typeof window === 'undefined') return DEFAULT_PRIMARY_COLOR;
-  return localStorage.getItem(COLOR_STORAGE_KEY) || DEFAULT_PRIMARY_COLOR;
+  return localStorage.getItem(PRIMARY_COLOR_STORAGE_KEY) || DEFAULT_PRIMARY_COLOR;
+}
+
+/**
+ * Get stored secondary color from localStorage
+ */
+export function getStoredSecondaryColor(): string {
+  if (typeof window === 'undefined') return DEFAULT_SECONDARY_COLOR;
+  return localStorage.getItem(SECONDARY_COLOR_STORAGE_KEY) || DEFAULT_SECONDARY_COLOR;
 }
 
 /**
@@ -94,6 +104,18 @@ export function applyPrimaryColor(color: string): void {
 }
 
 /**
+ * Apply secondary color to document via CSS variable
+ */
+export function applySecondaryColor(color: string): void {
+  if (typeof document === 'undefined') return;
+  document.documentElement.style.setProperty('--secondary-500', color);
+  
+  // Рассчитываем темный оттенок для анимаций (аналог secondary-700)
+  const darkColor = darkenColor(color, 20); // На 20% темнее
+  document.documentElement.style.setProperty('--secondary-700', darkColor);
+}
+
+/**
  * Store theme in localStorage
  */
 export function storeTheme(theme: Theme): void {
@@ -107,7 +129,15 @@ export function storeTheme(theme: Theme): void {
  */
 export function storePrimaryColor(color: string): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(COLOR_STORAGE_KEY, color);
+  localStorage.setItem(PRIMARY_COLOR_STORAGE_KEY, color);
+}
+
+/**
+ * Store secondary color in localStorage
+ */
+export function storeSecondaryColor(color: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(SECONDARY_COLOR_STORAGE_KEY, color);
 }
 
 /**
@@ -117,6 +147,15 @@ export function resetPrimaryColor(): string {
   applyPrimaryColor(DEFAULT_PRIMARY_COLOR);
   storePrimaryColor(DEFAULT_PRIMARY_COLOR);
   return DEFAULT_PRIMARY_COLOR;
+}
+
+/**
+ * Reset secondary color to default
+ */
+export function resetSecondaryColor(): string {
+  applySecondaryColor(DEFAULT_SECONDARY_COLOR);
+  storeSecondaryColor(DEFAULT_SECONDARY_COLOR);
+  return DEFAULT_SECONDARY_COLOR;
 }
 
 /**
@@ -133,6 +172,14 @@ export function setTheme(theme: Theme): void {
 export function setPrimaryColor(color: string): void {
   applyPrimaryColor(color);
   storePrimaryColor(color);
+}
+
+/**
+ * Set secondary color (apply + store)
+ */
+export function setSecondaryColor(color: string): void {
+  applySecondaryColor(color);
+  storeSecondaryColor(color);
 }
 
 /**

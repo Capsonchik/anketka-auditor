@@ -1,0 +1,22 @@
+services:
+  next-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: next-pattern-app
+    restart: always
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+    # healthcheck:
+    #   test: ["CMD", "wget", "--spider", "-q", "http://localhost:3002"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
+
+networks:
+  default:
+    name: next-app-network

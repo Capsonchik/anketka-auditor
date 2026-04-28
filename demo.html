@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey-all — Кабинет Аудитора</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #020617 0%, #020617 32%, #f5f7fb 32%, #f5f7fb 100%);
+            color: #111827;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding-bottom: 70px; /* Пространство для нижнего меню */
+        }
+        .container {
+            max-width: 1040px;
+            margin: 24px auto 88px;
+            background-color: #ffffff;
+            padding: 28px 32px;
+            border-radius: 18px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+        }
+        /* Общие стили для всех страниц */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+            margin-bottom: 20px;
+        }
+        header .logo {
+            font-weight: 800;
+            font-size: 24px;
+            letter-spacing: 0.04em;
+            color: #1f8ceb;
+        }
+        header .user-info {
+            font-size: 15px;
+            color: #4b5563;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background-color: #f3f4f6;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        header .user-info:hover {
+            background-color: #e5e7eb;
+            color: #111827;
+        }
+        /* New styles for toggle switch */
+        .switch-container {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 15px; /* Adjust as needed */
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            vertical-align: middle;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #28a745; /* Green for online */
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #28a745;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(20px);
+            -ms-transform: translateX(20px);
+            transform: translateX(20px);
+        }
+
+        .offline-status-text-display {
+            margin-left: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffc107; /* Default to offline color */
+        }
+        .online-status-text-display {
+            color: #28a745; /* Green for online */
+        }
+
+        /* Loading overlay styles */
+        #loading-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #loading-overlay .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #777;
+            font-size: 12px;
+        }
+        nav.bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: radial-gradient(circle at top, #1f2937 0%, #020617 60%);
+            color: #e5e7eb;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 4px;
+            box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.65);
+            z-index: 1000;
+            flex-wrap: nowrap;
+        }
+        nav.bottom-nav a {
+            color: #e5e7eb;
+            text-decoration: none;
+            padding: 6px 8px;
+            border-radius: 999px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            flex: 1;
+            text-align: center;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        nav.bottom-nav a:hover, nav.bottom-nav a.active {
+            background-color: rgba(31, 140, 235, 0.2);
+            color: #f9fafb;
+        }
+
+        /* Стили для Дэшборда */
+        .welcome-message {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Для адаптивности */
+        }
+        .welcome-message .dashboard-summary-metrics {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 16px; /* Чуть меньше, чем основной текст приветствия */
+        }
+        .welcome-message .dashboard-summary-metrics span {
+            background-color: #e0f2fe;
+            color: #1f2937;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+            border: 1px solid #bfdbfe;
+            cursor: pointer;
+        }
+        .welcome-message .dashboard-summary-metrics span:hover {
+            background-color: #dbeafe;
+        }
+        .welcome-message .dashboard-summary-metrics .current-balance {
+            background-color: #ecfdf3;
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px 22px;
+            box-shadow: 0 16px 35px rgba(15, 23, 42, 0.06);
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+        .card .value {
+            font-size: 34px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+        .card .description {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .card.red .value {
+            color: #f97373;
+        }
+        .card-clickable {
+            cursor: pointer;
+            transition: box-shadow 0.2s ease, transform 0.1s ease;
+        }
+        .card-clickable:hover {
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+        .task-card.highlight-task {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
+        }
+        .task-card .certification-button {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .task-card .certification-button:hover {
+            background-color: #e0a800;
+        }
+        .task-list ul, .notifications-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .task-list li, .notifications-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            color: #555;
+        }
+        .task-list li:last-child, .notifications-list li:last-child {
+            border-bottom: none;
+        }
+        .task-list li strong {
+            color: #333;
+        }
+        .task-list li .date {
+            color: #007bff;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .notifications-list li .date {
+            color: #777;
+            font-size: 13px;
+            margin-right: 10px;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 18px;
+        }
+        .quick-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1f8ceb 0%, #22c1c3 100%);
+            color: #f9fafb;
+            box-shadow: 0 10px 25px rgba(31, 140, 235, 0.35);
+            transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+        .quick-actions button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 35px rgba(31, 140, 235, 0.45);
+            opacity: 0.95;
+        }
+
+        /* Стили для Мои Задания (Список) */
+        .filter-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 12px 14px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        .filter-panel input[type="text"],
+        .filter-panel select {
+            padding: 7px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
+            min-width: 140px;
+            background-color: #ffffff;
+        }
+        .filter-panel input[type="text"]:focus,
+        .filter-panel select:focus {
+            outline: none;
+            border-color: #1f8ceb;
+            box-shadow: 0 0 0 1px #1f8ceb33;
+        }
+        .filter-panel .reset-filters-button {
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px dashed #9ca3af;
+            background-color: #ffffff;
+            color: #4b5563;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .filter-panel .reset-filters-button:hover {
+            background-color: #f3f4f6;
+        }
+        .filter-panel .apply-filters-button {
+            padding: 7px 14px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #1f8ceb 0%, #22c1c3 100%);
+            color: #f9fafb;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 6px 14px rgba(31, 140, 235, 0.35);
+        }
+        .filter-panel .apply-filters-button:hover {
+            box-shadow: 0 10px 20px rgba(31, 140, 235, 0.45);
+        }
+        .task-card {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.15s ease, transform 0.12s ease;
+        }
+        .task-card:hover {
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+            transform: translateY(-1px);
+        }
+        .task-status-in-progress { border-left: 4px solid #f97316; }
+        .task-status-assigned { border-left: 4px solid #1f8ceb; }
+        .task-status-overdue { border-left: 4px solid #ef4444; }
+        .task-status-completed { border-left: 4px solid #16a34a; }
+        .task-status-free { border-left: 4px solid #4b5563; }
+        .task-card h2 {
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .task-card p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+        .task-card .status {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .status.assigned { background-color: rgba(31, 140, 235, 0.08); color: #1f8ceb; }
+        .status.in-progress { background-color: rgba(249, 115, 22, 0.08); color: #f97316; }
+        .status.completed { background-color: rgba(34, 197, 94, 0.08); color: #16a34a; }
+        .status.overdue { background-color: rgba(239, 68, 68, 0.08); color: #ef4444; }
+        .status.free { background-color: rgba(148, 163, 184, 0.16); color: #4b5563; }
+
+        .task-card .action-buttons-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+        .task-card .action-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #007bff;
+            color: #fff;
+            transition: background-color 0.2s ease;
+        }
+        .task-card .action-button:hover {
+            background-color: #0056b3;
+        }
+        .task-card .offline-download-button {
+            background-color: #28a745;
+        }
+        .task-card .offline-download-button:hover {
+            background-color: #218838;
+        }
+
+        /* Стили для Карты Заданий */
+        .map-area {
+            flex-grow: 1;
+            background-color: #e0e0e0; /* Имитация карты */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #666;
+            min-height: 400px; /* Минимальная высота для карты */
+            position: relative;
+            overflow: hidden; /* Для имитации маркеров */
+            margin-bottom: 20px;
+        }
+        .map-marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #007bff; /* Синий - назначено */
+            border: 2px solid #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.12s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+        }
+        .map-marker:hover {
+            transform: translateY(-1px) scale(1.05);
+            box-shadow: 0 4px 10px rgba(15,23,42,0.35);
+        }
+        .map-marker.dimmed {
+            opacity: 0.3;
+        }
+        .map-marker.in-progress { background-color: #ffc107; } /* Желтый */
+        .map-marker.completed { background-color: #28a745; } /* Зеленый */
+        .map-marker.overdue { background-color: #dc3545; } /* Красный */
+        .map-marker.free { background-color: #6c757d; opacity: 0.7; } /* Серый - свободные */
+
+        /* Пример расположения маркеров */
+        .marker-1 { top: 30%; left: 20%; }
+        .marker-2 { top: 50%; left: 45%; }
+        .marker-3 { top: 70%; left: 60%; }
+        .marker-4 { top: 20%; left: 70%; }
+        .marker-5 { top: 80%; left: 30%; }
+
+        /* Стили для Формы Заполнения Анкеты */
+        .back-link {
+            display: block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .task-info {
+            background-color: #e9f7ef;
+            border: 1px solid #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .task-info strong {
+            color: #28a745;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #555;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #f0f0f0;
+            border-radius: 5px;
+            background-color: #fdfdfd;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #444;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group select,
+        .form-group textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-group input[type="radio"] {
+            margin-right: 5px;
+        }
+        .form-group .radio-option {
+            margin-right: 15px;
+            display: inline-block;
+        }
+        .form-group .input-with-unit {
+            display: flex;
+            align-items: center;
+        }
+        .form-group .input-with-unit input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .form-group .required-indicator {
+            color: red;
+            margin-left: 5px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .button-group button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+        .button-group .btn-save {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        .button-group .btn-save:hover {
+            background-color: #5a6268;
+        }
+        .button-group .btn-submit {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .button-group .btn-submit:hover {
+            background-color: #0056b3;
+        }
+        .timer-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        /* Стили для Профиля */
+        .profile-info p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .profile-info strong {
+            color: #333;
+        }
+        .profile-settings button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .profile-settings button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Стили для Поддержки */
+        .support-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .support-form input[type="text"],
+        .support-form input[type="email"],
+        .support-form textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .support-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .support-form button:hover {
+            background-color: #0056b3;
+        }
+        .contact-info {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        /* Стили для Моя Эффективность (объединенные Статистика и История) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .rating-block, .balance-block {
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+        }
+        .rating-block h2, .balance-block h2 {
+            color: #007bff;
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .rating-block .value, .balance-block .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+        }
+        .rating-block .description, .balance-block .description {
+            font-size: 14px;
+            color: #777;
+        }
+        .stats-chart-placeholder {
+            background-color: #e0e0e0;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            font-size: 18px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .history-table th, .history-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .history-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #555;
+        }
+        .history-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .history-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Адаптивный дизайн */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+            }
+            header .user-info {
+                margin-top: 10px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .welcome-message {
+                flex-direction: column;
+                align-items: flex-start;
+                font-size: 18px;
+            }
+            .welcome-message .dashboard-summary-metrics {
+                margin-top: 15px;
+                justify-content: flex-start;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .quick-actions {
+                flex-direction: column;
+            }
+            .quick-actions button {
+                width: 100%;
+            }
+            .filter-panel {
+                flex-direction: column;
+            }
+            .filter-panel input[type="text"],
+            .filter-panel select {
+                width: 100%;
+                min-width: unset;
+            }
+            .task-card .action-buttons-group {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .task-card .action-button {
+                width: 100%;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .button-group button {
+                width: 100%;
+            }
+            .form-group .input-with-unit {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .form-group .input-with-unit input {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            .form-group .radio-option {
+                display: block;
+                margin-bottom: 5px;
+            }
+            .history-table th, .history-table td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            .history-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .bottom-nav a {
+                font-size: 12px;
+                padding: 5px;
+            }
+            .welcome-message {
+                font-size: 16px;
+            }
+            .welcome-message .dashboard-summary-metrics span {
+                padding: 3px 8px;
+                font-size: 14px;
+            }
+            .card h2 {
+                font-size: 16px;
+            }
+            .card .value {
+                font-size: 30px;
+            }
+            .task-card h2 {
+                font-size: 16px;
+            }
+            .task-card p {
+                font-size: 13px;
+            }
+            .timer-display {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 10px; font-size: 18px; color: #333;">Загрузка...</p>
+    </div>
+    <div class="main-content">
+        <!-- Дэшборд -->
+        <div id="dashboard" class="container page-content">
+            <header>
+                <div class="logo">Survey-all</div>
+                <div class="user-info" onclick="showPage('profile')">
+    Иван Иванов <span style="margin-left: 10px;">⚙️</span>
+    <div class="switch-container">
+        <label class="switch">
+            <input type="checkbox" class="offline-mode-toggle-input">
+            <span class="slider round"></span>
+        </label>
+        <span class="offline-status-text-display offline-status-text">Оффлайн</span>
+    </div>
+</div>
+            </header>
+
+            <h1 class="welcome-message">
+                Привет, Иван!
+                <div class="dashboard-summary-metrics">
+                    <span class="current-rating" onclick="showPage('stats')" title="Перейти в Эффективность">Рейтинг: #12</span>
+                    <span class="current-score" onclick="showPage('stats')" title="Перейти в Эффективность">Средний балл: 4.8</span>
+                    <span class="current-balance" onclick="showPage('stats')" title="Перейти в Эффективность">Баланс: 15 500 ₽</span>
+                </div>
+            </h1>
+
+            <div class="dashboard-grid">
+                <div class="card card-clickable" onclick="goToTasksWithFilter('active')">
+                    <h2>Активные задачи</h2>
+                    <div class="value">5</div>
+                    <div class="description">Назначено и в работе</div>
+                </div>
+                <div class="card red card-clickable" onclick="goToTasksWithFilter('overdue')">
+                    <h2>Просрочено</h2>
+                    <div class="value">1</div>
+                    <div class="description">Задачи с истёкшим сроком</div>
+                </div>
+                <div class="card card-clickable" onclick="goToTasksWithFilter('free')">
+                    <h2>Свободные проверки</h2>
+                    <div class="value">3</div>
+                    <div class="description">Доступны для подачи заявки</div>
+                </div>
+                <div class="card card-clickable" onclick="goToStatsHistory()">
+                    <h2>Выполнено</h2>
+                    <div class="value">5/25</div>
+                    <div class="description">Завершено сегодня / за неделю</div>
+                </div>
+            </div>
+
+            <div class="card task-list">
+                <h2>Ближайшие задачи</h2>
+                <ul>
+                    <li onclick="openTask('task-kvi-sof')" style="cursor:pointer;"><span class="date">01.08</span> <strong>Перекрёсток, ул. Ленина 10</strong> (KVI) - Срок: 14:00</li>
+                    <li onclick="openTask('task-shelf-grocery')" style="cursor:pointer;"><span class="date">01.08</span> <strong>Пятёрочка, пр. Мира 5</strong> (Полочный) - Срок: 16:00</li>
+                    <li onclick="openTask('task-kvi-dairy')" style="cursor:pointer;"><span class="date">02.08</span> <strong>Магнит, ул. Садовая 25</strong> (KVI) - Срок: 12:00</li>
+                </ul>
+            </div>
+
+            <div class="card notifications-list" style="margin-top: 20px;">
+                <h2>Уведомления</h2>
+                <ul>
+                    <li><span class="date">25.07</span> Обновление анкеты "KVI-мониторинг" (версия 2.1)</li>
+                    <li><span class="date">24.07]</span> Напоминание: Пройдите обучение по новым правилам фотофиксации</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Мои Задания (Список) -->
+        <div id="tasks" class="container page-content" style="display:none;">
+            <header>
+                <div class="logo">Survey-all</div>
+                <div class="user-info" onclick="showPage('profile')">Иван Иванов <span style="margin-left: 10px;">⚙️</span></div>
+            </header>
+
+            <h1>Мои Задания</h1>
+
+            <div class="filter-panel">
+                <input type="text" id="filter-id" placeholder="ID проверки">
+                <input type="text" id="tasks-search-text" placeholder="Название / адрес">
+                <select id="filter-status">
+                    <option value="">Статус</option>
+                    <option value="assigned">Назначено</option>
+                    <option value="in-progress">В работе</option>
+                    <option value="completed">Выполнено</option>
+                    <option value="overdue">Просрочено</option>
+                    <option value="free">Свободные</option>
+                </select>
+                <select id="filter-client">
+                    <option value="">Клиент</option>
+                    <option value="perekrestok">Перекрёсток</option>
+                    <option value="pyaterochka">Пятёрочка</option>
+                    <option value="lenta">Лента</option>
+                    <option value="auchan">Ашан</option>
+                </select>
+                <select id="filter-city">
+                    <option value="">Город</option>
+                    <option value="moscow">Москва</option>
+                    <option value="spb">Санкт-Петербург</option>
+                </select>
+                <select id="filter-project">
+                    <option value="">Проект</option>
+                    <option value="kvi">KVI-мониторинг</option>
+                    <option value="shelf">Полочный мониторинг</option>
+                    <option value="checklist">Чек-лист аудит</option>
+                </select>
+                <select id="filter-form">
+                    <option value="">Анкета</option>
+                    <option value="sof">СОФ</option>
+                    <option value="grocery">Бакалея</option>
+                    <option value="dairy">Молочка</option>
+                    <option value="general">Общий аудит</option>
+                </select>
+                <button type="button" class="reset-filters-button" onclick="resetTaskFilters()">Сбросить</button>
+                <button type="button" class="apply-filters-button" onclick="applyTaskFilters()">Применить</button>
+            </div>
+
+            <div id="tasks-filter-indicator" style="font-size: 13px; color: #6b7280; margin-bottom: 6px;">Активный фильтр: все задания</div>
+            <div id="tasks-count-indicator" style="font-size: 13px; color: #4b5563; margin-bottom: 10px;">Показано проверок: 0</div>
+            <div id="tasks-empty-state" style="display:none; padding: 16px; font-size: 14px; color: #6b7280; background-color: #f9fafb; border-radius: 8px; border: 1px dashed #e5e7eb;">
+                По текущим фильтрам заданий нет. Попробуйте изменить параметры поиска или сбросить фильтры.
+            </div>
+
+            <div class="task-list">
+                <div class="task-card task-status-in-progress" id="task-kvi-sof" data-city="moscow" data-client="perekrestok" data-project="kvi" data-form="sof" data-due="2025-08-01">
+                    <h2>KVI-мониторинг (СОФ)</h2>
+                    <p><strong>ID проверки:</strong> CHK-0001</p>
+                    <p><strong>ТТ:</strong> Перекрёсток, ул. Ленина 10, Москва</p>
+                    <p><strong>Срок:</strong> 01.08.2025, 14:00 МСК</p>
+                    <p><strong>Оплата:</strong> 400 ₽</p>
+                    <p><strong>Легенда:</strong> Проверка цен KVI-позиций в основных зонах выкладки.</p>
+                    <p><strong>Запрещенные дни:</strong> Пн, Вс.</p>
+                    <p><a href="#" onclick="openInstructions(); return false;">Инструкция по заданию</a></p>
+                    <p><strong>Комментарий контролера:</strong> Особое внимание на выкладку KVI-позиций.</p>
+                    <span class="status in-progress">В РАБОТЕ</span>
+                    <div class="action-buttons-group">
+                        <button class="action-button offline-download-button">Скачать для оффлайн</button>
+                        <button class="action-button certification-button" onclick="startCertification('task-kvi-sof')">Сертификация</button>
+                        <button class="action-button" onclick="showPage('form')">Продолжить</button>
+                    </div>
+                </div>
+
+                <div class="task-card task-status-assigned" id="task-shelf-grocery" data-city="moscow" data-client="pyaterochka" data-project="shelf" data-form="grocery" data-due="2025-08-01">
+                    <h2>Полочный мониторинг (Бакалея)</h2>
+                    <p><strong>ID проверки:</strong> CHK-0002</p>
+                    <p><strong>ТТ:</strong> Пятёрочка, пр. Мира 5, Москва</p>
+                    <p><strong>Срок:</strong> 01.08.2025, 16:00 МСК</p>
+                    <p><strong>Оплата:</strong> 350 ₽</p>
+                    <p><strong>Легенда:</strong> Оценка полноты и порядка выкладки в бакалейном отделе.</p>
+                    <p><strong>Запрещенные дни:</strong> Нет.</p>
+                    <p><a href="#" onclick="openInstructions(); return false;">Инструкция по заданию</a></p>
+                    <p><strong>Комментарий контролера:</strong> Проверьте наличие всех обязательных категорий.</p>
+                    <span class="status assigned">НАЗНАЧЕНО</span>
+                    <div class="action-buttons-group">
+                        <button class="action-button offline-download-button">Скачать для оффлайн</button>
+                        <button class="action-button certification-button" onclick="startCertification('task-shelf-grocery')">Сертификация</button>
+                        <button class="action-button" onclick="showPage('form')">Начать</button>
+                    </div>
+                </div>
+
+                <div class="task-card task-status-overdue" id="task-kvi-dairy" data-city="moscow" data-client="magnit" data-project="kvi" data-form="dairy" data-due="2025-07-31">
+                    <h2>KVI-мониторинг (Молочка)</h2>
+                    <p><strong>ID проверки:</strong> CHK-0003</p>
+                    <p><strong>ТТ:</strong> Магнит, ул. Садовая 25, Москва</p>
+                    <p><strong>Срок:</strong> 31.07.2025, 12:00 МСК</p>
+                    <p><strong>Оплата:</strong> 300 ₽</p>
+                    <p><strong>Легенда:</strong> Проверка наличия и цен молочной KVI-линейки.</p>
+                    <p><strong>Запрещенные дни:</strong> Сб.</p>
+                    <p><a href="#" onclick="openInstructions(); return false;">Инструкция по заданию</a></p>
+                    <p><strong>Комментарий контролера:</strong> Сделайте фото всей молочной полки.</p>
+                    <span class="status overdue">ПРОСРОЧЕНО</span>
+                    <div class="action-buttons-group">
+                        <button class="action-button offline-download-button">Скачать для оффлайн</button>
+                        <button class="action-button certification-button" onclick="startCertification('task-kvi-dairy')">Сертификация</button>
+                        <button class="action-button" onclick="showPage('form')">Просмотреть</button>
+                    </div>
+                </div>
+
+                <div class="task-card task-status-completed" id="task-checklist-general" data-city="moscow" data-client="auchan" data-project="checklist" data-form="general" data-due="2025-07-30">
+                    <h2>Чек-лист (Общий аудит)</h2>
+                    <p><strong>ID проверки:</strong> CHK-0004</p>
+                    <p><strong>ТТ:</strong> Ашан, ул. Профсоюзная 100, Москва</p>
+                    <p><strong>Срок:</strong> 30.07.2025, 18:00 МСК</p>
+                    <p><strong>Оплата:</strong> 450 ₽</p>
+                    <p><strong>Легенда:</strong> Комплексная оценка торговой точки по чек-листу.</p>
+                    <p><strong>Запрещенные дни:</strong> Вс.</p>
+                    <p><a href="#" onclick="openInstructions(); return false;">Инструкция по заданию</a></p>
+                    <p><strong>Комментарий контролера:</strong> Проверьте чистоту зала и наличие POS-материалов.</p>
+                    <span class="status completed">ВЫПОЛНЕНО</span>
+                    <div class="action-buttons-group">
+                        <button class="action-button offline-download-button">Скачать для оффлайн</button>
+                        <button class="action-button certification-button" onclick="startCertification('task-checklist-general')">Сертификация</button>
+                        <button class="action-button" onclick="showPage('form')">Просмотреть</button>
+                    </div>
+                </div>
+
+                <div class="task-card task-status-free" id="task-free-kvi-sof" data-city="moscow" data-client="lenta" data-project="kvi" data-form="sof" data-due="2025-08-02">
+                    <h2>Свободная проверка: KVI-мониторинг (СОФ)</h2>
+                    <p><strong>ID проверки:</strong> CHK-0005</p>
+                    <p><strong>ТТ:</strong> Лента, ул. Лесная 15, Москва</p>
+                    <p><strong>Срок:</strong> 02.08.2025, 20:00 МСК</p>
+                    <p><strong>Оплата:</strong> 380 ₽</p>
+                    <p><strong>Легенда:</strong> Свободная проверка цен KVI-позиций, можно взять в работу.</p>
+                    <p><strong>Запрещенные дни:</strong> Нет.</p>
+                    <p><a href="#" onclick="openInstructions(); return false;">Инструкция по заданию</a></p>
+                    <p><strong>Комментарий контролера:</strong> Доступно для подачи заявки, возьмите, если вы рядом.</p>
+                    <span class="status free">СОЗДАНА (СВОБОДНА)</span>
+                    <div class="action-buttons-group">
+                        <button class="action-button" onclick="alert('Заявка отправлена. После подтверждения задание появится в ваших активных.');">Подать заявку</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карта Заданий -->
+        <div id="map" class="container page-content" style="display:none;">
+            <header>
+                <div class="logo">Survey-all</div>
+                <div class="user-info" onclick="showPage('profile')">Иван Иванов <span style="margin-left: 10px;">⚙️</span></div>
+            </header>
+
+            <h1>Карта Заданий</h1>
+
+            <div class="filter-panel">
+                <input type="text" id="map-filter-id" placeholder="ID проверки">
+                <input type="text" id="map-search-text" placeholder="Название / адрес">
+                <select id="map-filter-status">
+                    <option value="">Статус</option>
+                    <option value="assigned">Назначено</option>
+                    <option value="in-progress">В работе</option>
+                    <option value="completed">Выполнено</option>
+                    <option value="overdue">Просрочено</option>
+                    <option value="free">Свободные</option>
+                </select>
+                <select id="map-filter-client">
+                    <option value="">Клиент</option>
+                    <option value="perekrestok">Перекрёсток</option>
+                    <option value="pyaterochka">Пятёрочка</option>
+                    <option value="lenta">Лента</option>
+                    <option value="auchan">Ашан</option>
+                </select>
+                <select id="map-filter-city">
+                    <option value="">Город</option>
+                    <option value="moscow">Москва</option>
+                    <option value="spb">Санкт-Петербург</option>
+                </select>
+                <select id="map-filter-project">
+                    <option value="">Проект</option>
+                    <option value="kvi">KVI-мониторинг</option>
+                    <option value="shelf">Полочный мониторинг</option>
+                    <option value="checklist">Чек-лист аудит</option>
+                </select>
+                <select id="map-filter-form">
+                    <option value="">Анкета</option>
+                    <option value="sof">СОФ</option>
+                    <option value="grocery">Бакалея</option>
+                    <option value="dairy">Молочка</option>
+                    <option value="general">Общий аудит</option>
+                </select>
+                <button type="button" class="reset-filters-button" onclick="resetMapFilters()">Сбросить</button>
+                <button type="button" class="apply-filters-button" onclick="applyMapFilters()">Применить</button>
+            </div>
+
+            <div id="map-count-indicator" style="font-size: 13px; color: #4b5563; margin-bottom: 10px;">Показано проверок: 0</div>
+
+            <div class="map-area">
+                <p>Имитация карты с маркерами заданий</p>
+                <!-- Пример маркеров -->
+                <div class="map-marker marker-1 assigned" title="Перекрёсток, ул. Ленина 10">1</div>
+                <div class="map-marker marker-2 in-progress" title="Пятёрочка, пр. Мира 5">2</div>
+                <div class="map-marker marker-3 completed" title="Магнит, ул. Садовая 25">3</div>
+                <div class="map-marker marker-4 overdue" title="Ашан, ул. Профсоюзная 100">4</div>
+                <div class="map-marker marker-5 free" title="Лента, ул. Лесная 15 (Свободно)">F</div>
+            </div>
+        </div>
+
+        <!-- Детали Задания / Форма заполнения анкеты -->
+        <div id="form" class="container page-content" style="display:none;">
+            <header>
+                <div class="logo">Survey-all</div>
+                <div class="user-info" onclick="showPage('profile')">Иван Иванов <span style="margin-left: 10px;">⚙️</span></div>
+            </header>
+
+            <a href="#" class="back-link" onclick="showPage('tasks'); return false;">&lt; Назад к "Мои Задания"</a>
+
+            <h1>Детали Задания: KVI-мониторинг (СОФ)</h1>
+            <div class="timer-display">Осталось: 01:23:45</div>
+            <div class="task-info">
+                <strong>ТТ:</strong> Перекрёсток, ул. Ленина 10, Москва<br>
+                <strong>Срок:</strong> 01.08.2025, 14:00 МСК<br>
+                <strong>Статус:</strong> <strong style="color: #007bff;">В РАБОТЕ</strong>
+            </div>
+
+            <div class="progress-bar-container" style="margin-bottom: 20px;">
+                <div style="font-size: 14px; margin-bottom: 5px;">Прогресс заполнения: 60%</div>
+                <div class="progress-bar" style="width: 100%; background-color: #e0e0e0; border-radius: 5px; height: 10px;">
+                    <div class="progress-bar-fill" style="width: 60%; background-color: #28a745; height: 100%; border-radius: 5px;"></div>
+                </div>
+            </div>
+
+            <div class="section-title">Общая информация по визиту</div>
+            <div class="form-group">
+                <label>Время начала визита:</label>
+                <input type="text" value="01.08.2025 10:30" disabled>
+            </div>
+            <div class="form-group">
+                <label>Геолокация:</label>
+                <input type="text" value="55.7558, 37.6173 (автоматически)" disabled>
+            </div>
+            <div class="form-group">
+                <label>Фото фасада ТТ:</label>
+                <input type="file" accept="image/*">
+            </div>
+
+            <div class="section-title">Заполнение анкеты</div>
+
+            <div class="form-group">
+                <label>Товар: Яблоки Голден (KVI)</label>
+                <label>Название на ценнике:<span class="required-indicator">*</span></label>
+                <input type="text" placeholder="Введите название с ценника">
+
+                <label style="margin-top: 15px;">Бренд:</label>
+                <select>
+                    <option value="">Выберите бренд</option>
+                    <option value="own_brand">Собственная марка</option>
+                    <option value="farmer">Фермерское</option>
+                    <option value="other">Другое</option>
+                </select>
+
+                <label style="margin-top: 15px;">Вес/Объем:<span class="required-indicator">*</span></label>
+                <div class="input-with-unit">
+                    <input type="number" placeholder="Введите значение">
+                    <select>
+                        <option value="kg">кг</option>
+                        <option value="g">г</option>
+                        <option value="l">л</option>
+                        <option value="ml">мл</option>
+                        <option value="pcs">шт</option>
+                    </select>
+                </div>
+
+                <label style="margin-top: 15px;">Цена регулярная:<span class="required-indicator">*</span></label>
+                <input type="number" placeholder="Введите цену">
+
+                <label style="margin-top: 15px;">Цена промо:</label>
+                <input type="number" placeholder="Введите промо-цену (если есть)">
+
+                <label style="margin-top: 15px;">Тип промо:</label>
+                <select>
+                    <option value="">Выберите тип промо</option>
+                    <option value="discount_percent">Скидка %</option>
+                    <option value="buy_one_get_one">2 по цене 1</option>
+                    <option value="no_promo">Нет промо</option>
+                </select>
+
+                <label style="margin-top: 15px;">Срок действия промо (если есть):</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="date" style="width: 50%;" title="Дата начала">
+                    <input type="date" style="width: 50%;" title="Дата окончания">
+                </div>
+
+                <label style="margin-top: 15px;">Наличие:<span class="required-indicator">*</span></label>
+                <div>
+                    <label class="radio-option"><input type="radio" name="availability_apple" value="in_stock" checked> Есть на полке</label>
+                    <label class="radio-option"><input type="radio" name="availability_apple" value="out_of_stock"> Нет на полке</label>
+                    <label class="radio-option"><input type="radio" name="availability_apple" value="not_in_store"> Нет в магазине</label>
+                </div>
+
+                <label style="margin-top: 15px;">Фото ценника/полки:<span class="required-indicator">*</span></label>
+                <input type="file" accept="image/*">
+
+                <label style="margin-top: 15px;">Комментарий:</label>
+                <textarea placeholder="Дополнительные комментарии"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Товар: Молоко 3.2% (KVI)</label>
+                <!-- Аналогичные поля для второго товара -->
+                <label>Название на ценнике:<span class="required-indicator">*</span></label>
+                <input type="text" placeholder="Введите название с ценника">
+
+                <label style="margin-top: 15px;">Наличие:<span class="required-indicator">*</span></label>
+                <div>
+                    <label class="radio-option"><input type="radio" name="availability_milk" value="in_stock"> Есть на полке</label>
+                    <label class="radio-option"><input type="radio" name="availability_milk" value="out_of_stock" checked> Нет на полке</label>
+                    <label class="radio-option"><input type="radio" name="availability_milk" value="not_in_store"> Нет в магазине</label>
+                </div>
+                <label style="margin-top: 15px;">Фото пустой полки:<span class="required-indicator">*</span></label>
+                <input type="file" accept="image/*">
+            </div>
+
+            <div class="section-title">Общие вопросы по ТТ</div>
+            <div class="form-group">
+                <label>Чистота в торговом зале:<span class="required-indicator">*</span></label>
+                <div>
+                    <label class="radio-option"><input type="radio" name="cleanliness" value="yes" checked> Да</label>
+                    <label class="radio-option"><input type="radio" name="cleanliness" value="no"> Нет</label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-save">Сохранить черновик</button>
+                <button class="btn-submit">Отправить</button>
+            </div>
+        </div>
+
+        <!-- Профиль -->
+        <div id="profile" class="container page-content" style="display:none;">
+            <header>
+                <div class="logo">Survey-all</div>
+                <div class="user-info" onclick="showPage('profile')">Иван Иванов <span style="margin-left: 10px;">⚙️</span></div>
+            </header>
+            <h1>Мой Профиль</h1>
+            <div class="profile-info">
+                <p><strong>ФИО:</strong> Иван Иванович Иванов</p>
+                <p><strong>Email:</strong> ivan.ivanov@example.com</p>
+                <p><strong>Телефон:</strong> +7 (XXX) XXX-XX-XX</p>
+                <p><strong>Город:</strong> Москва</p>
+                <p><strong>Роль:</strong> Аудитор</p>
+                <p><strong>Режим оффлайн:</strong> <span id="profile-current-offline-status">Включен</span></p>
+            </div>
+            <div class="section-title">Настройки</div>
+            <div class="profile-settings">
+                <p><strong>Язык интерфейса:</strong> Русский</p>
+                <button>Изменить пароль</button>
+                <button style="margin-left: 10px;">Настроить уведомления</button>
+            </div>
+        </div>
+
+        <!-- Поддержка / Обратная связь -->
+        <div id="support" class="container page-content" style="display:none;">
+            <header>
+                <div class="logo">Survey-all</div>
+                <div class="user-info" onclick="showPage('profile')">Иван Иванов <span style="margin-left: 10px;">⚙️</span></div>
+            </header>
+            <h1>Поддержка и Обратная связь</h1>
+            <p>Если у вас возникли вопросы или проблемы, пожалуйста, заполните форму ниже или свяжитесь с нами.</p>
+            <form class="support-form">
+                <label for="subject">Тема обращения:</label>
+                <input type="text" id="subject" placeholder="Например: Проблема с анкетой, Вопрос по оплате">
+
+                <label for="message">Сообщение:</label>
+                <textarea id="message" placeholder="Опишите вашу проблему или вопрос максимально подробно"></textarea>
+
+                <button type="submit">Отправить сообщение</button>
+            </form>
+            <div class="contact-info">
+                <h2>Контакты</h2>
+                <p><strong>Телефон:</strong> +7 (495) 123-45-67</p>
+                <p><strong>Email:</strong> support@survey-all.com</p>
+                <p><strong>Время работы:</strong> Пн-Пт, 9:00 - 18:00 МСК</p>
+            </div>
+        </div>
+
+        <!-- Инструкции -->
+        <div id="instructions" class="container page-content" style="display:none;">
+            <header>
+                <div class="logo">Survey-all</div>
+                <div class="user-info" onclick="showPage('profile')">Иван Иванов <span style="margin-left: 10px;">⚙️</span></div>
+            </header>
+            <h1>Инструкции</h1>
+            <p>Здесь будет размещена подробная информация и инструкции для аудиторов.</p>
+            <div class="section-title">Общие правила</div>
+            <ul>
+                <li>Всегда следуйте инструкциям, указанным в задании.</li>
+                <li>Делайте четкие и качественные фотографии.</li>
+                <li>Соблюдайте сроки выполнения заданий.</li>
+            </ul>
+            <div class="section-title">Часто задаваемые вопросы</div>
+            <p><strong>Как начать выполнение задания?</strong></p>
+            <p>Перейдите в раздел "Мои Задания", выберите нужное задание и нажмите "Начать".</p>
+            <p><strong>Что делать, если нет связи?</strong></p>
+            <p>Вы можете скачать задание для оффлайн работы. Данные будут синхронизированы при появлении связи.</p>
+        </div>
+
+        <!-- Моя Эффективность (объединенные Статистика и История) -->
+        <div id="stats" class="container page-content" style="display:none;">
+            <header>
+                <div class="logo">Survey-all</div>
+                <div class="user-info" onclick="showPage('profile')">Иван Иванов <span style="margin-left: 10px;">⚙️</span></div>
+            </header>
+            <h1>Моя Эффективность</h1>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>Выполнено за месяц</h2>
+                    <div class="value">45</div>
+                    <div class="description">Завершено проверок</div>
+                </div>
+                <div class="card">
+                    <h2>Средний балл качества</h2>
+                    <div class="value">4.8</div>
+                    <div class="description">По оценкам супервизора</div>
+                </div>
+            </div>
+
+            <div class="section-title">Рейтинг</div>
+            <div class="rating-block">
+                <h2>Мой рейтинг</h2>
+                <div class="value">#12</div>
+                <div class="description">Среди всех аудиторов</div>
+                <p style="margin-top: 15px;">Вы входите в топ 15% лучших аудиторов!</p>
+                <div class="stats-chart-placeholder" style="height: 250px;">График динамики рейтинга (placeholder)</div>
+            </div>
+
+            <div class="section-title">Оплата / Баланс</div>
+            <div class="balance-block">
+                <h2>Текущий баланс</h2>
+                <div class="value">15 500 ₽</div>
+                <div class="description">К выплате за текущий период</div>
+                <p style="margin-top: 15px;">Последняя выплата: 20.07.2025 (25 000 ₽)</p>
+                <button style="margin-top: 10px; padding: 8px 15px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer;">Запросить детализацию</button>
+            </div>
+
+            <div class="section-title">История Проверок</div>
+            <p>Здесь вы можете просмотреть все выполненные вами проверки.</p>
+
+            <div class="filter-panel">
+                <input type="text" placeholder="Поиск по названию/адресу...">
+                <select>
+                    <option value="">Период</option>
+                    <option value="last_month">Последний месяц</option>
+                    <option value="last_quarter">Последний квартал</option>
+                    <option value="all_time">Все время</option>
+                </select>
+                <select>
+                    <option value="">Город</option>
+                    <option value="moscow">Москва</option>
+                    <option value="spb">Санкт-Петербург</option>
+                </select>
+            </div>
+
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Задание</th>
+                        <th>ТТ / Адрес</th>
+                        <th>Статус</th>
+                        <th>Оценка</th>
+                        <th>Цена проверки</th>
+                        <th>Комментарий контролера</th>
+                        <th>ID проверки</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>01.08.2025</td>
+                        <td>KVI-мониторинг (СОФ)</td>
+                        <td>Перекрёсток, ул. Ленина 10</td>
+                        <td>Выполнено</td>
+                        <td>4.9</td>
+                        <td>400 ₽</td>
+                        <td>Фото ценников подтверждены, расхождений нет.</td>
+                        <td>CHK-0001</td>
+                        <td><button onclick="showPage('form')" style="padding: 5px 10px; font-size: 12px;">Просмотреть</button></td>
+                    </tr>
+                    <tr>
+                        <td>30.07.2025</td>
+                        <td>Полочный мониторинг (Бакалея)</td>
+                        <td>Пятёрочка, пр. Мира 5</td>
+                        <td>Выполнено</td>
+                        <td>4.7</td>
+                        <td>350 ₽</td>
+                        <td>Не все обязательные категории, исправлено после доработки.</td>
+                        <td>CHK-0002</td>
+                        <td><button onclick="showPage('form')" style="padding: 5px 10px; font-size: 12px;">Просмотреть</button></td>
+                    </tr>
+                    <tr>
+                        <td>29.07.2025</td>
+                        <td>KVI-мониторинг (Молочка)</td>
+                        <td>Магнит, ул. Садовая 25</td>
+                        <td>Выполнено</td>
+                        <td>5.0</td>
+                        <td>300 ₽</td>
+                        <td>Отличное качество фото, все поля заполнены корректно.</td>
+                        <td>CHK-0003</td>
+                        <td><button onclick="showPage('form')" style="padding: 5px 10px; font-size: 12px;">Просмотреть</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="#" onclick="showPage('dashboard'); return false;" id="nav-dashboard">Главная</a>
+        <a href="#" onclick="showPage('tasks'); return false;" id="nav-tasks">Мои Задания</a>
+        <a href="#" onclick="showPage('map'); return false;" id="nav-map">Карта</a>
+        <a href="#" onclick="showPage('support'); return false;" id="nav-support">Поддержка</a>
+        <a href="#" onclick="showPage('instructions'); return false;" id="nav-instructions">Инструкции</a>
+    </nav>
+
+    <footer>
+        <p>&copy; 2025 Survey-all. Все права защищены.</p>
+    </footer>
+
+    <!-- JS-функции:
+         updateOfflineStatusDisplays / toggleOfflineMode – управление оффлайн-режимом и статусом.
+         showPage / originalShowPage – навигация между основными экранами и установка активного пункта меню.
+         filterTasks / goToTasksWithFilter / resetTaskFilters – фильтрация списка заданий и переход с уже выбранным фильтром.
+         openTask – переход к нужной карточке задания из блока «Ближайшие задачи».
+         openInstructions / startCertification – переход к разделу инструкций и точка интеграции сертификационных опросов.
+    -->
+
+    <script>
+        // Global state for offline mode
+        let isOffline = true; // Start as offline as per the initial indicator
+
+        function updateOfflineStatusDisplays() {
+            const toggles = document.querySelectorAll('.offline-mode-toggle-input');
+            const statusTexts = document.querySelectorAll('.offline-status-text-display');
+            const profileOfflineStatus = document.getElementById('profile-current-offline-status');
+
+            toggles.forEach(toggle => {
+                toggle.checked = !isOffline; // Checkbox checked means online
+            });
+
+            statusTexts.forEach(statusText => {
+                if (isOffline) {
+                    statusText.textContent = 'Оффлайн';
+                    statusText.classList.add('offline-status-text-display');
+                    statusText.classList.remove('online-status-text-display');
+                    statusText.style.color = '#ffc107'; // Explicitly set color
+                } else {
+                    statusText.textContent = 'Онлайн';
+                    statusText.classList.add('online-status-text-display');
+                    statusText.classList.remove('offline-status-text-display');
+                    statusText.style.color = '#28a745'; // Explicitly set color
+                }
+            });
+
+            if (profileOfflineStatus) {
+                profileOfflineStatus.textContent = isOffline ? 'Включен' : 'Выключен';
+                profileOfflineStatus.style.color = isOffline ? '#ffc107' : '#28a745';
+            }
+        }
+
+        function toggleOfflineMode(event) {
+            isOffline = !event.target.checked; // If checkbox is checked, it's online (not offline)
+            updateOfflineStatusDisplays();
+            console.log('Offline mode is now:', isOffline ? 'ON' : 'OFF');
+        }
+
+        function showLoading() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        // Original showPage function
+        const originalShowPage = function(pageId) {
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => {
+                page.style.display = 'none';
+            });
+            document.getElementById(pageId).style.display = 'block';
+
+            const navLinks = document.querySelectorAll('.bottom-nav a');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            const activeNavLink = document.getElementById('nav-' + pageId);
+            if (activeNavLink) {
+                activeNavLink.classList.add('active');
+            }
+        };
+
+        // Override showPage to include loading animation
+        window.showPage = function(pageId) { // Make the overridden function globally accessible
+            showLoading();
+            setTimeout(() => {
+                originalShowPage(pageId);
+                hideLoading();
+            }, 500);
+        };
+
+        let currentFilterType = 'all';
+
+        function updateTasksFilterIndicator(filterType) {
+            const indicator = document.getElementById('tasks-filter-indicator');
+            if (!indicator) return;
+            const labels = {
+                'all': 'все задания',
+                'active': 'активные (назначено и в работе)',
+                'overdue': 'просроченные',
+                'free': 'свободные проверки'
+            };
+            const label = labels[filterType] || labels['all'];
+            indicator.textContent = 'Активный фильтр: ' + label;
+        }
+
+        function updateTasksEmptyState() {
+            const list = document.querySelector('#tasks .task-list');
+            const emptyState = document.getElementById('tasks-empty-state');
+            const countEl = document.getElementById('tasks-count-indicator');
+            if (!list || !emptyState) return;
+            const visibleCards = Array.from(list.querySelectorAll('.task-card')).filter(card => card.style.display !== 'none');
+            emptyState.style.display = visibleCards.length === 0 ? 'block' : 'none';
+            if (countEl) {
+                countEl.textContent = 'Показано проверок: ' + visibleCards.length;
+            }
+        }
+
+        function applyMapFilter(filterType) {
+            const markers = document.querySelectorAll('.map-marker');
+            let visibleCount = 0;
+            markers.forEach(marker => {
+                const isAssigned = marker.classList.contains('assigned');
+                const isInProgress = marker.classList.contains('in-progress');
+                const isCompleted = marker.classList.contains('completed');
+                const isOverdue = marker.classList.contains('overdue');
+                const isFree = marker.classList.contains('free');
+
+                let match = false;
+                if (filterType === 'active') {
+                    match = isAssigned || isInProgress;
+                } else if (filterType === 'overdue') {
+                    match = isOverdue;
+                } else if (filterType === 'free') {
+                    match = isFree;
+                } else {
+                    match = true;
+                }
+                if (match) {
+                    marker.classList.remove('dimmed');
+                    visibleCount++;
+                } else {
+                    marker.classList.add('dimmed');
+                }
+            });
+            const mapCount = document.getElementById('map-count-indicator');
+            if (mapCount) {
+                mapCount.textContent = 'Показано проверок: ' + visibleCount;
+            }
+        }
+
+        function resetMapFilters() {
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) return;
+            const inputs = mapContainer.querySelectorAll('.filter-panel input[type="text"]');
+            const selects = mapContainer.querySelectorAll('.filter-panel select');
+            inputs.forEach(i => i.value = '');
+            selects.forEach(s => s.value = '');
+            applyMapFilter('all');
+        }
+
+        function applyMapFilters() {
+            const statusSelect = document.getElementById('map-filter-status');
+            const statusValue = statusSelect ? statusSelect.value : '';
+            if (statusValue === 'overdue') {
+                applyMapFilter('overdue');
+            } else if (statusValue === 'free') {
+                applyMapFilter('free');
+            } else if (statusValue === 'assigned' || statusValue === 'in-progress') {
+                applyMapFilter('active');
+            } else {
+                applyMapFilter('all');
+            }
+            // В дальнейшем сюда можно добавить фильтрацию по ID, клиенту, городу, проекту и анкете.
+        }
+
+        function filterTasks(filterType) {
+            currentFilterType = filterType;
+            const cards = document.querySelectorAll('#tasks .task-card');
+            cards.forEach(card => {
+                const statusEl = card.querySelector('.status');
+                if (!statusEl) return;
+                const isAssigned = statusEl.classList.contains('assigned');
+                const isInProgress = statusEl.classList.contains('in-progress');
+                const isOverdue = statusEl.classList.contains('overdue');
+                const isFree = statusEl.classList.contains('free');
+
+                if (filterType === 'active') {
+                    card.style.display = (isAssigned || isInProgress) ? 'block' : 'none';
+                } else if (filterType === 'overdue') {
+                    card.style.display = isOverdue ? 'block' : 'none';
+                } else if (filterType === 'free') {
+                    card.style.display = isFree ? 'block' : 'none';
+                } else {
+                    card.style.display = 'block';
+                }
+            });
+            updateTasksFilterIndicator(filterType);
+            updateTasksEmptyState();
+            applyMapFilter(filterType);
+        }
+
+        function resetTaskFilters() {
+            const tasksContainer = document.getElementById('tasks');
+            if (!tasksContainer) return;
+            const textInputs = tasksContainer.querySelectorAll('.filter-panel input[type="text"]');
+            const selects = tasksContainer.querySelectorAll('.filter-panel select');
+            textInputs.forEach(input => input.value = '');
+            selects.forEach(select => select.value = '');
+            filterTasks('all');
+        }
+
+        function applyTaskFilters() {
+            const statusSelect = document.getElementById('filter-status');
+            const statusValue = statusSelect ? statusSelect.value : '';
+            if (statusValue === 'overdue') {
+                filterTasks('overdue');
+            } else if (statusValue === 'free') {
+                filterTasks('free');
+            } else if (statusValue === 'assigned' || statusValue === 'in-progress') {
+                filterTasks('active');
+            } else {
+                filterTasks('all');
+            }
+            // В дальнейшем сюда можно добавить фильтрацию по ID, клиенту, городу, проекту и анкете.
+        }
+
+        function goToTasksWithFilter(filterType) {
+            showPage('tasks');
+            setTimeout(() => {
+                filterTasks(filterType);
+            }, 600);
+        }
+
+        function goToStatsHistory() {
+            showPage('stats');
+            setTimeout(() => {
+                const historyBlock = document.querySelector('#stats .history-table');
+                if (historyBlock) {
+                    historyBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 600);
+        }
+
+        function openTask(taskId) {
+            showPage('tasks');
+            setTimeout(() => {
+                filterTasks('all');
+                const card = document.getElementById(taskId);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    card.classList.add('highlight-task');
+                    setTimeout(() => card.classList.remove('highlight-task'), 2000);
+                }
+            }, 600);
+        }
+
+        function openInstructions() {
+            showPage('instructions');
+        }
+
+        function startCertification(taskId) {
+            openInstructions();
+        }
+
+        // Показать Дэшборд при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            updateOfflineStatusDisplays();
+
+            const toggles = document.querySelectorAll('.offline-mode-toggle-input');
+            toggles.forEach(toggle => {
+                toggle.addEventListener('change', toggleOfflineMode);
+                toggle.addEventListener('click', event => {
+                    event.stopPropagation();
+                });
+            });
+
+            const switchContainers = document.querySelectorAll('.switch-container');
+            switchContainers.forEach(container => {
+                container.addEventListener('click', event => {
+                    event.stopPropagation();
+                });
+            });
+
+            showPage('dashboard');
+        });
+    </script>
+</body>
+</html>

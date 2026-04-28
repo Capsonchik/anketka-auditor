@@ -7,8 +7,8 @@
 }
 
 .trigger {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: 2px solid $gray-300;
   border-radius: $radius-full;
@@ -26,11 +26,15 @@
   }
 }
 
-.colorPreview {
+.previews {
+  display: flex;
   width: 100%;
   height: 100%;
-  background-color: var(--primary-500);
-  border-radius: $radius-full;
+}
+
+.colorPreview {
+  flex: 1;
+  height: 100%;
 }
 
 .dropdown {
@@ -110,3 +114,6 @@
     transform: translateY(0);
   }
 }
+
+
+

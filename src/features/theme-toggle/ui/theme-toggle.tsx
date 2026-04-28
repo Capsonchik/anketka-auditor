@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import { useTheme } from '@shared/hooks';
 import { SunIcon, MoonIcon } from '@shared/icons';
 import styles from './theme-toggle.module.scss';

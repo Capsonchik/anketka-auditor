@@ -1,7 +1,7 @@
 'use client'
 
 import React, { forwardRef, useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import { Input, InputProps } from '../input/input';
 import { CIS_COUNTRIES, findCountryByPrefix, Country } from './countries';
 import { GlobeIcon } from './flags';

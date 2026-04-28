@@ -1,0 +1,172 @@
+
+
+.dashboard {
+  .welcomeMessage {
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-8;
+    color: $text-secondary;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    @include fluid-property(font-size, 20px, 18px);
+    @include fade-in-up('left', 20px, 0.4s);
+
+    @media (max-width: $breakpoint-md) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  .summaryMetrics {
+    display: flex;
+    gap: $spacing-4;
+    flex-wrap: wrap;
+    font-size: $font-size-sm;
+
+    @media (max-width: $breakpoint-md) {
+      margin-top: $spacing-4;
+      justify-content: flex-start;
+    }
+
+    span {
+      background-color: $primary-50;
+      color: $primary-900;
+      padding: $spacing-1 $spacing-3;
+      border-radius: $radius-full;
+      font-weight: $font-weight-medium;
+      border: 1px solid $primary-200;
+      cursor: pointer;
+      transition: all $transition-normal;
+
+      &:hover {
+        background-color: $primary-100;
+      }
+
+      &.rating {
+        background-color: $warning-50;
+        color: $warning-900;
+        border-color: $warning-200;
+
+        &:hover {
+          background-color: $warning-100;
+        }
+      }
+      &.score {
+        background-color: $info-50;
+        color: $info-900;
+        border-color: $info-200;
+
+        &:hover {
+          background-color: $info-100;
+        }
+      }
+
+      &.balance {
+        background-color: $success-50;
+        color: $success-900;
+        border-color: $success-200;
+
+        &:hover {
+          background-color: $success-100;
+        }
+      }
+    }
+  }
+
+  .dashboardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: $spacing-4;
+    margin-bottom: $spacing-6;
+
+    @media (max-width: $breakpoint-md) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    background: linear-gradient(135deg, $bg-primary 0%, $bg-secondary 100%);
+    border: 1px solid $border-color;
+    border-radius: $radius-lg;
+    padding: $spacing-5 $spacing-6;
+    box-shadow: $color-shadow;
+    @include fade-in-up('bottom', 20px, 0.5s);
+
+    h2 {
+      @include fluid-property(font-size, 18px, 16px);
+      margin-top: 0;
+      margin-bottom: $spacing-3;
+      color: $text-primary;
+    }
+
+    .value {
+      @include fluid-property(font-size, 34px, 30px);
+      font-weight: $font-weight-bold;
+      color: $primary;
+      margin-bottom: $spacing-1;
+    }
+
+    .description {
+      font-size: $font-size-xs;
+      color: $text-secondary;
+    }
+
+    &.red .value {
+      color: $danger;
+    }
+
+    &.cardClickable {
+      cursor: pointer;
+      transition: all $transition-normal;
+
+      &:hover {
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  .taskList, .notificationsList {
+    @include fade-in-up('bottom', 20px, 0.6s);
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 180px;
+      overflow-y: auto;
+      @include custom-scrollbar();
+    }
+
+    li {
+      padding: $spacing-3 0;
+      border-bottom: 1px solid $border-color;
+      font-size: $font-size-sm;
+      color: $text-secondary;
+      transition: color $transition-normal;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        color: $text-primary;
+      }
+
+      .date {
+        color: $primary;
+        font-weight: $font-weight-bold;
+        margin-right: $spacing-1;
+      }
+    }
+  }
+
+  .notificationsList li .date {
+    color: $text-secondary;
+    font-size: $font-size-xs;
+    margin-right: $spacing-3;
+  }
+}
+
+
+

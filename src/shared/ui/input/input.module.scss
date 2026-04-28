@@ -11,8 +11,12 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $spacing-1;
-  width: fit-content;
+  width: 100%;
+}
+
+.inputWrapper {
+  position: relative;
+  width: 100%;
 }
 
 .block {
@@ -463,3 +467,6 @@
 .warningHint {
   color: $warning-500;  
 }
+
+
+

@@ -1,0 +1,50 @@
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: $text-primary;
+  margin: 0;
+  padding-bottom: $spacing-2;
+  border-bottom: 1px solid $gray-100;
+}
+
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-4;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.passwordField {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.eyeButton {
+  position: absolute;
+  right: 12px;
+  bottom: 8px; // Учитываем label
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: $gray-400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 150ms ease;
+
+  &:hover {
+    color: $primary-500;
+  }
+}

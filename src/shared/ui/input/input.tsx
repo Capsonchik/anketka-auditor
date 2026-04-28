@@ -1,7 +1,7 @@
 'use client'
 
 import React, { forwardRef, useState, useCallback, useEffect, useRef } from 'react';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import { ErrorTooltip } from '../error-tooltip';
 import styles from './input.module.scss';
 
@@ -83,6 +83,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
   const [internalValue, setInternalValue] = useState(value ?? '');
   const [localError, setLocalError] = useState<string | undefined>(error);
   const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const triggerRef = useRef<HTMLInputElement>(null);
 
   // Синхронизация локальной ошибки с пропсом
   useEffect(() => {
@@ -125,77 +126,88 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
     onChange?.(clearEvent);
   }, [onChange, localError, onClearError]);
 
-  const hasValue = Boolean(internalValue);
-  const isFloating = isFocused || hasValue || props.placeholder;
   const currentState = localError ? 'error' : state;
+  
+  // Проверяем наличие элементов для стилизации
+  const hasLeftElement = !!(leftElement || leftIcon);
+  const hasRightElement = !!(rightElement || rightIcon);
 
   return (
-    <div className={clsx(styles.wrapper, block && styles.block)}>
+    <div className={clsx(
+      styles.wrapper,
+      block && styles.block,
+      className
+    )}>
       {label && (
-        <label className={clsx(styles.label, isFloating && styles.floating)}>
+        <label className={styles.label}>
           {label}
         </label>
       )}
-      
-      <div className={clsx(
-        styles.container,
-        styles[size],
-        styles[variant],
-        styles[currentState],
-        isFocused && styles.focused,
-        disabled && styles.disabled,
-        readOnly && styles.readOnly,
-        (leftIcon || leftElement) && styles.hasLeftElement,
-        (rightIcon || rightElement || clearable) && styles.hasRightElement,
-        className
-      )}>
-        {leftElement && <span className={styles.leftElement}>{leftElement}</span>}
-        {leftIcon && <span className={styles.leftIcon}>{leftIcon}</span>}
-        
-        <input
-          ref={ref}
-          type={type}
-          className={clsx(styles.input, type === 'color' && styles.colorInput)}
-          value={value !== undefined ? value : internalValue}
-          onChange={handleChange}
-          disabled={disabled}
-          readOnly={readOnly}
-          {...props}
-          onFocus={(e) => {
-            setIsFocused(true);
-            props.onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setIsFocused(false);
-            props.onBlur?.(e);
-          }}
-        />
-        
-        {clearable && hasValue && !disabled && !readOnly && (
-          <button
-            type="button"
-            className={styles.clearButton}
-            onClick={handleClear}
-            tabIndex={-1}
-            aria-label="Clear input"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6 6 18" />
-              <path d="m6 6 12 12" />
-            </svg>
-          </button>
-        )}
-        
-        {!clearable && rightElement && <span className={styles.rightElement}>{rightElement}</span>}
-        {!clearable && rightIcon && !rightElement && <span className={styles.rightIcon}>{rightIcon}</span>}
+
+      <div className={styles.inputWrapper}>
+        <div 
+          className={clsx(
+            styles.container,
+            styles[size],
+            styles[variant],
+            styles[currentState],
+            isFocused && styles.focused,
+            disabled && styles.disabled,
+            readOnly && styles.readOnly,
+            block && styles.block,
+            hasLeftElement && styles.hasLeftElement,  // 👈 исправлено
+            hasRightElement && styles.hasRightElement // 👈 исправлено
+          )}
+          onClick={() => !disabled && !readOnly && triggerRef.current?.focus()}
+        >
+          {leftElement || (leftIcon && <span className={styles.leftIcon}>{leftIcon}</span>)}
+          
+          <input
+            {...props}
+            ref={(node) => {
+              triggerRef.current = node;
+              if (typeof ref === 'function') ref(node);
+              else if (ref) ref.current = node;
+            }}
+            type={type}
+            className={clsx(styles.input, type === 'color' && styles.colorInput)}
+            value={value !== undefined ? value : internalValue}
+            disabled={disabled}
+            readOnly={readOnly}
+            onFocus={(e) => {
+              setIsFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+              props.onBlur?.(e);
+            }}
+            onChange={handleChange}
+          />
+
+          {clearable && internalValue && !disabled && !readOnly && (
+            <button 
+              type="button" 
+              className={styles.clearButton}
+              onClick={handleClear}
+              aria-label="Clear input"
+              tabIndex={-1}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          )}
+
+          {rightElement || (rightIcon && <span className={styles.rightIcon}>{rightIcon}</span>)}
+        </div>
 
         <ErrorTooltip error={localError} />
       </div>
-      
+
       {hint && !localError && (
-        <span className={clsx(styles.hint, styles[`${currentState}Hint`])}>
-          {hint}
-        </span>
+        <p className={styles.hint}>{hint}</p>
       )}
     </div>
   );
@@ -259,6 +271,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
   }, [props.onChange, localError, onClearError]);
 
   const currentState = localError ? 'error' : state;
+  
+  // Проверяем наличие элементов для стилизации
+  const hasLeftElement = !!(leftElement || leftIcon);
+  const hasRightElement = !!(rightElement || rightIcon);
 
   return (
     <div className={clsx(styles.wrapper, block && styles.block)}>
@@ -268,20 +284,22 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
         </label>
       )}
       
-      <div className={clsx(
-        styles.container,
-        styles.containerTextarea,
-        styles[size],
-        styles[variant],
-        styles[currentState],
-        isFocused && styles.focused,
-        disabled && styles.disabled,
-        readOnly && styles.readOnly,
-        (leftIcon || leftElement) && styles.hasLeftElement,
-        (rightIcon || rightElement) && styles.hasRightElement,
-        className
-      )}
-      style={{ '--textarea-resize': resize } as React.CSSProperties}>
+      <div 
+        className={clsx(
+          styles.container,
+          styles.containerTextarea,
+          styles[size],
+          styles[variant],
+          styles[currentState],
+          isFocused && styles.focused,
+          disabled && styles.disabled,
+          readOnly && styles.readOnly,
+          hasLeftElement && styles.hasLeftElement,   // 👈 исправлено
+          hasRightElement && styles.hasRightElement, // 👈 исправлено
+          className
+        )}
+        style={{ '--textarea-resize': resize } as React.CSSProperties}
+      >
         {leftElement && <span className={styles.leftElement}>{leftElement}</span>}
         {leftIcon && <span className={styles.leftIcon}>{leftIcon}</span>}
         
@@ -319,4 +337,3 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({
 });
 
 Textarea.displayName = 'Textarea';
-

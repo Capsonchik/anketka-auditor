@@ -1,0 +1,129 @@
+
+
+
+.mapPage {
+  h1 {
+    @include fluid-property(font-size, 28px, 24px);
+    margin-bottom: $spacing-5;
+    color: $text-primary;
+    @include fade-in-up('left', 20px, 0.4s);
+  }
+}
+
+.filterPanel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-3;
+  margin-bottom: $spacing-4;
+  padding: $spacing-3 $spacing-4;
+  background-color: $bg-primary;
+  border-radius: $radius-lg;
+  border: 1px solid $border-color;
+  @include fade-in-up('top', 10px, 0.5s);
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+  }
+
+  input, select {
+    padding: $spacing-2 $spacing-3;
+    border: 1px solid $border-color;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    min-width: 140px;
+    background-color: $bg-primary;
+    color: $text-primary;
+
+    @media (max-width: $breakpoint-md) {
+      width: 100%;
+      min-width: unset;
+    }
+  }
+
+  .resetBtn {
+    padding: $spacing-2 $spacing-4;
+    border-radius: $radius-full;
+    border: 1px dashed $text-secondary;
+    background-color: transparent;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    transition: all $transition-normal;
+
+    &:hover {
+      background-color: $bg-secondary;
+      color: $text-primary;
+    }
+  }
+
+  .applyBtn {
+    padding: $spacing-2 $spacing-4;
+    border-radius: $radius-full;
+    border: none;
+    background: linear-gradient(135deg, $primary 0%, $secondary 100%);
+    color: $gray-50;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba($primary, 0.35);
+    transition: all $transition-normal;
+
+    &:hover {
+      box-shadow: 0 10px 20px rgba($primary, 0.45);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.mapArea {
+  flex-grow: 1;
+  background-color: $gray-200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: $font-size-xl;
+  color: $text-secondary;
+  min-height: 400px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: $spacing-5;
+  border-radius: $radius-lg;
+  @include fade-in-up('bottom', 30px, 0.7s);
+}
+
+.mapMarker {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: $radius-full;
+  background-color: $primary;
+  border: 2px solid $bg-primary;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: $gray-50;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-xs;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  transition: all $transition-normal;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 4px 10px rgba(15,23,42,0.35);
+    z-index: 10;
+  }
+
+  &.inProgress { background-color: $warning; }
+  &.completed { background-color: $success; }
+  &.overdue { background-color: $danger; }
+  &.free { background-color: $gray-500; opacity: 0.7; }
+}
+
+.marker1 { top: 30%; left: 20%; }
+.marker2 { top: 50%; left: 45%; }
+.marker3 { top: 70%; left: 60%; }
+.marker4 { top: 20%; left: 70%; }
+.marker5 { top: 80%; left: 30%; }
+
+
+

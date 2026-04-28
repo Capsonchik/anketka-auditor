@@ -6,20 +6,30 @@ import {
   getStoredPrimaryColor, 
   setPrimaryColor, 
   resetPrimaryColor,
-  applyPrimaryColor
+  applyPrimaryColor,
+  getStoredSecondaryColor,
+  setSecondaryColor,
+  resetSecondaryColor,
+  applySecondaryColor
 } from '@shared/lib/theme';
 import styles from './color-picker.module.scss';
 
 export const ColorPicker: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [color, setColor] = useState('#ff8200');
+  const [primaryColor, setPrimaryColorState] = useState('#42aaff');
+  const [secondaryColor, setSecondaryColorState] = useState('#77dde7');
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Инициализация цвета из хранилища
+  // Инициализация цветов из хранилища
   useEffect(() => {
-    const storedColor = getStoredPrimaryColor();
-    setColor(storedColor);
-    applyPrimaryColor(storedColor);
+    const storedPrimary = getStoredPrimaryColor();
+    const storedSecondary = getStoredSecondaryColor();
+    
+    setPrimaryColorState(storedPrimary);
+    applyPrimaryColor(storedPrimary);
+    
+    setSecondaryColorState(storedSecondary);
+    applySecondaryColor(storedSecondary);
   }, []);
 
   // Закрытие при клике вне компонента
@@ -40,15 +50,24 @@ export const ColorPicker: React.FC = () => {
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePrimaryColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newColor = e.target.value;
-    setColor(newColor);
-    setPrimaryColor(newColor); // Сразу сохраняем и применяем
+    setPrimaryColorState(newColor);
+    setPrimaryColor(newColor);
+  };
+
+  const handleSecondaryColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newColor = e.target.value;
+    setSecondaryColorState(newColor);
+    setSecondaryColor(newColor);
   };
 
   const handleReset = useCallback(() => {
-    const defaultColor = resetPrimaryColor();
-    setColor(defaultColor);
+    const defaultPrimary = resetPrimaryColor();
+    const defaultSecondary = resetSecondaryColor();
+    
+    setPrimaryColorState(defaultPrimary);
+    setSecondaryColorState(defaultSecondary);
   }, []);
 
   return (
@@ -56,9 +75,12 @@ export const ColorPicker: React.FC = () => {
       <button 
         className={styles.trigger} 
         onClick={toggleDropdown}
-        title="Настроить основной цвет"
+        title="Настроить цвета"
       >
-        <div className={styles.colorPreview} />
+        <div className={styles.previews}>
+          <div className={styles.colorPreview} style={{ backgroundColor: primaryColor }} />
+          <div className={styles.colorPreview} style={{ backgroundColor: secondaryColor }} />
+        </div>
       </button>
 
       {isOpen && (
@@ -67,8 +89,18 @@ export const ColorPicker: React.FC = () => {
             <label>Основной цвет</label>
             <input 
               type="color" 
-              value={color}
-              onChange={handleColorChange}
+              value={primaryColor}
+              onChange={handlePrimaryColorChange}
+              className={styles.colorInput}
+            />
+          </div>
+
+          <div className={styles.pickerSection}>
+            <label>Дополнительный цвет</label>
+            <input 
+              type="color" 
+              value={secondaryColor}
+              onChange={handleSecondaryColorChange}
               className={styles.colorInput}
             />
           </div>

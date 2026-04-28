@@ -1,0 +1,52 @@
+
+
+
+.instructionsPage {
+  h1 {
+    @include fluid-property(font-size, 28px, 24px);
+    margin-bottom: $spacing-5;
+    color: $text-primary;
+    @include fade-in-up('left', 20px, 0.4s);
+  }
+  p {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    @include fade-in-up('bottom', 10px, 0.5s);
+  }
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  margin-top: $spacing-8;
+  margin-bottom: $spacing-4;
+  color: $text-primary;
+  border-bottom: 1px solid $border-color;
+  padding-bottom: $spacing-1;
+  @include fade-in-up('left', 10px, 0.6s);
+}
+
+.list {
+  padding-left: $spacing-5;
+  @include fade-in-up('bottom', 20px, 0.7s);
+  li {
+    margin-bottom: $spacing-3;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+}
+
+.faq {
+  @include fade-in-up('bottom', 20px, 0.8s);
+  p {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin-bottom: $spacing-2;
+  }
+  strong {
+    color: $text-primary;
+  }
+}
+
+
+

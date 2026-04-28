@@ -24,6 +24,18 @@ $primary-800: var(--primary-800) !default;
 $primary-900: var(--primary-900) !default;
 $primary-950: var(--primary-950) !default;
 
+$secondary-50: var(--secondary-50) !default;
+$secondary-100: var(--secondary-100) !default;
+$secondary-200: var(--secondary-200) !default;
+$secondary-300: var(--secondary-300) !default;
+$secondary-400: var(--secondary-400) !default;
+$secondary-500: var(--secondary-500) !default;
+$secondary-600: var(--secondary-600) !default;
+$secondary-700: var(--secondary-700) !default;
+$secondary-800: var(--secondary-800) !default;
+$secondary-900: var(--secondary-900) !default;
+$secondary-950: var(--secondary-950) !default;
+
 $gray-50: var(--gray-50) !default;
 $gray-100: var(--gray-100) !default;
 $gray-200: var(--gray-200) !default;
@@ -88,6 +100,7 @@ $info-950: var(--info-950) !default;
 
 $bg-primary: var(--bg-primary) !default;
 $bg-secondary: var(--bg-secondary) !default;
+$bg-hover: var(--bg-hover) !default;
 $text-primary: var(--text-primary) !default;
 $text-secondary: var(--text-secondary) !default;
 $border-color: var(--border-color) !default;
@@ -122,3 +135,20 @@ $color-shadow: var(--color-shadow) !default;
     }
   }
 }
+// теперь проанализируй demo.html
+
+// нужно создать общий layout c bg и контент обернуть в карточку layout.tsx
+
+// создать navigation bar
+
+// верстку для страниц как demo.html
+
+// не нужно ничего создать в entitties и features
+
+// только в app и widgets
+
+// используй моковые данные
+
+// при создании компонентов
+
+// используй стили перменные миксины styles

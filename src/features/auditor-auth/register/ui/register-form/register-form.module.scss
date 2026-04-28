@@ -1,0 +1,37 @@
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-16;
+  align-items: start;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    gap: $spacing-8;
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: $spacing-4;
+}
+
+.submitBtn {
+  min-width: 320px;
+  height: 56px;
+  @include fluid-property('font-size', 16px, 15px);
+  font-weight: 800;
+  text-transform: none;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    min-width: 0;
+  }
+}

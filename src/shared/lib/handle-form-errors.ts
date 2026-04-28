@@ -13,12 +13,14 @@ export type FieldMapping<T extends FieldValues> = Record<string, Path<T>>;
  * @param setError - Функция setError из useForm
  * @param fieldMapping - Объект для сопоставления имен полей API с именами полей в форме
  * @param fallbackMessage - Сообщение об ошибке по умолчанию
+ * @param defaultField - Имя поля для установки общей ошибки (по умолчанию 'root')
  */
 export function handleFormErrors<T extends FieldValues>(
   error: any,
   setError: UseFormSetError<T>,
   fieldMapping?: FieldMapping<T>,
-  fallbackMessage: string = 'Произошла непредвиденная ошибка'
+  fallbackMessage: string = 'Произошла непредвиденная ошибка',
+  defaultField: Path<T> = 'root' as Path<T>
 ) {
   const errorData = error?.data;
 
@@ -46,7 +48,7 @@ export function handleFormErrors<T extends FieldValues>(
         const message = rawParsed.error_description || rawParsed.message || detail.message;
         
         if (message) {
-          setError('root' as Path<T>, {
+          setError(defaultField, {
             type: 'manual',
             message: String(message),
           });
@@ -57,7 +59,7 @@ export function handleFormErrors<T extends FieldValues>(
       }
     } else if (detail.message || detail.code) {
       // Если это объект с message или code (но без raw)
-      setError('root' as Path<T>, {
+      setError(defaultField, {
         type: 'manual',
         message: String(detail.message || detail.code),
       });
@@ -66,6 +68,14 @@ export function handleFormErrors<T extends FieldValues>(
 
     if (Array.isArray(detail)) {
       // Если это массив ошибок валидации FastAPI
+      if (detail.length === 0) {
+        setError(defaultField, {
+          type: 'manual',
+          message: fallbackMessage,
+        });
+        return;
+      }
+      
       errorData.detail.forEach((err: any) => {
         const apiField = err.loc?.[err.loc.length - 1];
         const message = err.msg;
@@ -76,11 +86,16 @@ export function handleFormErrors<T extends FieldValues>(
             type: 'manual',
             message: String(message),
           });
+        } else if (message) {
+          setError(defaultField, {
+            type: 'manual',
+            message: String(message),
+          });
         }
       });
     } else {
       // Если это просто строка с ошибкой
-      setError('root' as Path<T>, {
+      setError(defaultField, {
         type: 'manual',
         message: String(errorData.detail),
       });
@@ -90,15 +105,33 @@ export function handleFormErrors<T extends FieldValues>(
 
   // 3. Обработка общих ошибок (формат { error: 'message' })
   if (errorData?.error) {
-    setError('root' as Path<T>, {
+    setError(defaultField, {
       type: 'manual',
       message: String(errorData.error),
     });
     return;
   }
 
-  // 4. Fallback на сообщение по умолчанию
-  setError('root' as Path<T>, {
+  // 4. Обработка ошибки как строки
+  if (typeof errorData === 'string') {
+    setError(defaultField, {
+      type: 'manual',
+      message: errorData,
+    });
+    return;
+  }
+
+  // 5. Обработка ошибки с полем message
+  if (errorData?.message) {
+    setError(defaultField, {
+      type: 'manual',
+      message: String(errorData.message),
+    });
+    return;
+  }
+
+  // 6. Fallback на сообщение по умолчанию
+  setError(defaultField, {
     type: 'manual',
     message: fallbackMessage,
   });

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import type { ScrollRevealProps } from './scroll-reveal.types';
 import styles from './scroll-reveal.module.scss';
 

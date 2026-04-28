@@ -3,3 +3,4 @@ export type { ThemeProviderProps, ThemeContextValue } from '@core/providers/them
 
 export { useTheme as useThemeSimple } from './useTheme';
 export type { UseThemeReturn } from './useTheme';
+export * from './use-auto-clear-errors'

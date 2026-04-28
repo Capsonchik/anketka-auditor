@@ -1,0 +1,115 @@
+.register {
+  display: flex;
+  flex-direction: column;
+  @include fade-in-up('bottom', 10px, 0.4s);
+  width: 100%;
+  max-width: 1200px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+  margin-bottom: $spacing-8;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.title {
+  @include fluid-property('font-size', 28px, 24px);
+  font-weight: 900;
+  color: $text-primary;
+  margin: 0;
+}
+
+.subtitle {
+  @include fluid-property('font-size', 15px, 14px);
+  color: $text-secondary;
+  font-weight: 500;
+  margin: 0;
+}
+
+.roleSwitch {
+  width: 100%;
+  max-width: 480px;
+  background: $bg-hover;
+  & > div {
+    width: 100%;
+    & > * {
+      flex: 1;
+    }
+  }
+}
+
+.comingSoon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: $spacing-10 $spacing-6;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: $radius-2xl;
+  border: 1px dashed rgba(66, 170, 255, 0.3);
+  gap: $spacing-5;
+
+  [data-theme='dark'] & {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.comingSoonIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: radial-gradient(circle at 30% 30%, rgba(119, 221, 231, 0.4), transparent 70%),
+              radial-gradient(circle at 70% 70%, rgba(66, 170, 255, 0.3), transparent 70%),
+              rgba(154, 206, 235, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $primary-500;
+  margin-bottom: $spacing-2;
+}
+
+.comingSoonTitle {
+  @include fluid-property('font-size', 20px, 18px);
+  font-weight: 900;
+  color: $text-primary;
+  margin: 0;
+}
+
+.comingSoonText {
+  @include fluid-property('font-size', 15px, 14px);
+  color: $text-secondary;
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0;
+}
+
+.footer {
+  margin-top: $spacing-8;
+  display: flex;
+  justify-content: center;
+}
+
+.loginText {
+  font-size: 14px;
+  color: $text-secondary;
+}
+
+.link {
+  font-weight: 700;
+  color: $primary-500;
+  text-decoration: none;
+  transition: color 150ms ease;
+
+  &:hover {
+    color: $primary-600;
+    text-decoration: underline;
+  }
+}

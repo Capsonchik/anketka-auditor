@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 

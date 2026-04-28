@@ -1,0 +1,122 @@
+.section {
+  padding-top: $spacing-2;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.title {
+  @include fluid-property('font-size', 28px, 24px);
+  letter-spacing: -0.8px;
+  font-weight: 900;
+  color: $text-primary;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr 1fr;
+  gap: $spacing-4;
+  align-items: stretch;
+}
+
+.introCard {
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(10, 30, 60, 0.06);
+  box-shadow: 0 18px 46px rgba(18, 46, 90, 0.07);
+  padding: 18px 18px 16px;
+
+  [data-theme='dark'] & {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.introTitle {
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  color: $text-primary;
+  max-width: 320px;
+}
+
+.introText {
+  margin-top: 10px;
+  color: $text-secondary;
+  font-weight: 650;
+  @include fluid-property('font-size', 13px, 12px);
+  line-height: 1.7;
+  max-width: 360px;
+
+  [data-theme='dark'] & {
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.card {
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(10, 30, 60, 0.06);
+  box-shadow: 0 18px 46px rgba(18, 46, 90, 0.07);
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  [data-theme='dark'] & {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.cardName {
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  color: $text-primary;
+}
+
+.cardDesc {
+  color: $text-secondary;
+  font-weight: 650;
+  @include fluid-property('font-size', 13px, 12px);
+  line-height: 1.7;
+
+  [data-theme='dark'] & {
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.cardPrice {
+  margin-top: $spacing-1;
+  font-weight: 900;
+  @include fluid-property('font-size', 18px, 16px);
+  letter-spacing: -0.4px;
+  color: $text-primary;
+}
+
+.cardNote {
+  color: $text-secondary;
+  font-weight: 650;
+  @include fluid-property('font-size', 12px, 11px);
+  line-height: 1.6;
+
+  [data-theme='dark'] & {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.cardCta {
+  margin-top: auto;
+  white-space: pre-line;
+  text-align: center;
+}
+
+@media (max-width: $breakpoint-lg) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

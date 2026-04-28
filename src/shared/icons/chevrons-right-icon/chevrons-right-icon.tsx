@@ -1,6 +1,6 @@
 import { type SVGProps } from 'react'
 
-import clsx from 'clsx'
+import { clsx } from '@shared/lib/clsx'
 
 import styles from './chevrons-right-icon.module.scss'
 

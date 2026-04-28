@@ -1,0 +1,96 @@
+
+
+
+.supportPage {
+  h1 {
+    @include fluid-property(font-size, 28px, 24px);
+    margin-bottom: $spacing-5;
+    color: $text-primary;
+    @include fade-in-up('left', 20px, 0.4s);
+  }
+  p {
+    font-size: $font-size-base;
+    color: $text-secondary;
+    margin-bottom: $spacing-6;
+    @include fade-in-up('bottom', 10px, 0.5s);
+  }
+}
+
+.supportForm {
+  @include fade-in-up('bottom', 20px, 0.6s);
+  .formGroup {
+    margin-bottom: $spacing-5;
+
+    label {
+      display: block;
+      margin-bottom: $spacing-2;
+      font-weight: $font-weight-bold;
+      color: $text-primary;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: $spacing-3;
+      border: 1px solid $border-color;
+      border-radius: $radius-md;
+      font-size: $font-size-sm;
+      background-color: $bg-primary;
+      color: $text-primary;
+      box-sizing: border-box;
+      transition: border-color $transition-normal;
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+      }
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+  }
+
+  .submitBtn {
+    padding: $spacing-3 $spacing-6;
+    background-color: $primary;
+    color: $gray-50;
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    transition: all $transition-normal;
+
+    &:hover {
+      background-color: $primary-600;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.contactInfo {
+  margin-top: $spacing-8;
+  border-top: 1px solid $border-color;
+  padding-top: $spacing-5;
+  @include fade-in-up('bottom', 20px, 0.7s);
+
+  h2 {
+    font-size: $font-size-xl;
+    margin-bottom: $spacing-4;
+    color: $text-primary;
+  }
+
+  p {
+    margin-bottom: $spacing-2;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    
+    strong {
+      color: $text-primary;
+    }
+  }
+}
+
+
+

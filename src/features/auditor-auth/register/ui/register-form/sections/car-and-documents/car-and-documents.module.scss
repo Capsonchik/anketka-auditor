@@ -1,0 +1,25 @@
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: $text-primary;
+  margin: 0;
+  padding-bottom: $spacing-2;
+  border-bottom: 1px solid $gray-100;
+}
+
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-4;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}

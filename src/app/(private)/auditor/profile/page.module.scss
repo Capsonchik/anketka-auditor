@@ -1,0 +1,188 @@
+
+
+.profilePage {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabsHeader {
+  display: flex;
+  gap: $spacing-1;
+  border-bottom: 1px solid $border-color;
+  margin-bottom: $spacing-6;
+  overflow-x: auto;
+  @include custom-scrollbar(transparent, transparent, 0);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tabBtn {
+  padding: $spacing-3 $spacing-6;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: $radius-lg $radius-lg 0 0;
+  cursor: pointer;
+  font-size: $font-size-base;
+  color: $text-secondary;
+  transition: all $transition-normal;
+  white-space: nowrap;
+
+  &:hover {
+    color: $text-primary;
+    background-color: $bg-hover;
+  }
+
+  &.active {
+    color: $primary;
+    background-color: $bg-primary;
+    border-color: $border-color;
+    margin-bottom: -1px;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.contentWrapper {
+  flex-grow: 1;
+  @include fade-in-up('bottom', 20px, 0.4s);
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.profileLayout {
+  display: flex;
+  gap: $spacing-10;
+
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    gap: $spacing-6;
+  }
+}
+
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-4;
+  width: 240px;
+
+  @media (max-width: $breakpoint-md) {
+    width: 100%;
+  }
+}
+
+.avatarWrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+  border-radius: $radius-xl;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: $color-shadow;
+}
+
+.avatar {
+  font-size: 64px;
+  font-weight: $font-weight-bold;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+}
+
+.roleBadge {
+  padding: $spacing-1 $spacing-4;
+  background-color: #818cf8;
+  color: #ffffff;
+  border-radius: $radius-full;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.rightCol {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-5;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+
+  label {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    font-weight: $font-weight-medium;
+  }
+
+  input, select {
+    padding: $spacing-3;
+    border: 1px solid $border-color;
+    border-radius: $radius-lg;
+    font-size: $font-size-base;
+    background-color: $bg-primary;
+    color: $text-primary;
+    transition: border-color $transition-normal;
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+    }
+  }
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-3;
+  margin-top: $spacing-4;
+
+  button {
+    width: 44px;
+    height: 44px;
+    border-radius: $radius-lg;
+    border: 1px solid $border-color;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: $font-size-xl;
+    transition: all $transition-normal;
+    background-color: $bg-primary;
+
+    &.cancelBtn {
+      color: $text-secondary;
+      &:hover {
+        background-color: $bg-hover;
+        color: $danger;
+      }
+    }
+
+    &.saveBtn {
+      color: $text-primary;
+      &:hover {
+        background-color: $bg-hover;
+        border-color: $primary;
+        color: $primary;
+      }
+    }
+  }
+}
+
+.tabPlaceholder {
+  padding: $spacing-10;
+  text-align: center;
+  color: $text-secondary;
+  font-size: $font-size-lg;
+  background-color: $bg-secondary;
+  border-radius: $radius-xl;
+  border: 2px dashed $border-color;
+}

@@ -1,88 +1,126 @@
-.hero {
-  height: calc(100vh - #{$header-height});
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: $bg-primary;
-  color: $text-primary; 
-  padding: $spacing-6;
-  text-align: center;
-  overflow: hidden;
-  position: relative;
-
-  // Background animation placeholder
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 50% 50%, rgba(255, 122, 0, 0.1) 0%, transparent 70%);
-    z-index: 1;
-  }
+.section {
+  padding-top: $spacing-8;
 }
 
 .container {
-  position: relative;
-  z-index: 2;
-  max-width: 1200px;
-  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-8;
+  align-items: start;
 }
 
-.content {
-  @include fade-in-up('bottom', 30px, 0.4s);
+.left {
+  padding-top: 18px;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: $radius-full;
+  background: rgba(119, 221, 231, 0.22);
+  border: 1px solid rgba(66, 170, 255, 0.18);
+  color: $text-secondary;
+  font-weight: $font-weight-bold;
+  letter-spacing: 0.1px;
+  @include fluid-property('font-size', 13px, 12px);
 }
 
 .title {
-  font-size: 4rem;
-  font-weight: 800;
-  margin-bottom: $spacing-4;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-
-  .accent {
-    color: $primary-500; // Romir orange
-  }
+  margin-top: $spacing-4;
+  @include fluid-property('font-size', 48px, 32px);
+  line-height: 1.04;
+  letter-spacing: -1.8px;
+  font-weight: 900;
+  color: $text-primary;
+  max-width: 560px;
+  text-wrap: balance;
 }
 
 .subtitle {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin-bottom: $spacing-6;
-
-  .highlight {
-    color: $primary-500;
-  }
+  margin-top: $spacing-3;
+  @include fluid-property('font-size', 18px, 16px);
+  line-height: 1.75;
+  color: $text-secondary;
+  max-width: 560px;
 }
 
-.description {
-  font-size: 1.25rem;
-  line-height: 1.6;
-  max-width: 800px;
-  margin: 0 auto $spacing-10;
-  color: $text-secondary; 
-}
-
-.actions {
+.metrics {
+  margin-top: 18px;
   display: flex;
-  gap: $spacing-4;
+  gap: $spacing-6;
+  flex-wrap: wrap;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.metricValue {
+  @include fluid-property('font-size', 20px, 18px);
+  font-weight: 900;
+  letter-spacing: -0.4px;
+}
+
+.metricLabel {
+  @include fluid-property('font-size', 13px, 12px);
+  font-weight: 600;
+  color: $text-secondary;
+}
+
+.ctas {
+  margin-top: 22px;
+  display: flex;
+  gap: $spacing-3;
+  flex-wrap: wrap;
+}
+
+.stores {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.storeChip {
+  height: 36px;
+  padding: 0 $spacing-3;
+  border-radius: $radius-full;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  font-weight: $font-weight-bold;
+  @include fluid-property('font-size', 13px, 12px);
+  color: $text-primary;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(10, 30, 60, 0.06);
+
+  [data-theme='dark'] & {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
+.right {
+  display: flex;
+  justify-content: flex-end;
+}
 
+@media (max-width: $breakpoint-lg) {
+  .container {
+    grid-template-columns: 1fr;
+  }
 
-@media (max-width: 768px) {
+  .right {
+    justify-content: center;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
   .title {
-    font-size: 2.5rem;
-  }
-  .subtitle {
-    font-size: 1.75rem;
-  }
-  .actions {
-    flex-direction: column;
-    align-items: center;
+    letter-spacing: -1.2px;
   }
 }
-
-

@@ -1,0 +1,61 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+
+const API_URL = 'https://survey-all.ru';
+
+export async function GET(request: NextRequest) {
+  return handleProxy(request);
+}
+
+export async function POST(request: NextRequest) {
+  return handleProxy(request);
+}
+
+export async function PUT(request: NextRequest) {
+  return handleProxy(request);
+}
+
+export async function PATCH(request: NextRequest) {
+  return handleProxy(request);
+}
+
+export async function DELETE(request: NextRequest) {
+  return handleProxy(request);
+}
+
+async function handleProxy(request: NextRequest) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+  
+  const pathname = request.nextUrl.pathname.replace('/api/proxy', '');
+  const searchParams = request.nextUrl.searchParams.toString();
+  
+  const targetUrl = `${API_URL}${pathname}${searchParams ? `?${searchParams}` : ''}`;
+
+  const headers = new Headers();
+  headers.set('Accept', 'application/json');
+  headers.set('Content-Type', 'application/json');
+  
+  if (accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`);
+  }
+
+  try {
+    const body = ['GET', 'HEAD'].includes(request.method) 
+      ? undefined 
+      : await request.text();
+
+    const response = await fetch(targetUrl, {
+      method: request.method,
+      headers,
+      body,
+      cache: 'no-store',
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error('[Proxy] Error:', error);
+    return NextResponse.json({ error: 'Proxy error' }, { status: 500 });
+  }
+}

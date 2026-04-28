@@ -1,0 +1,102 @@
+.section {
+  padding-top: $spacing-2;
+}
+
+.title {
+  @include fluid-property('font-size', 28px, 24px);
+  letter-spacing: -0.8px;
+  font-weight: 900;
+  color: $text-primary;
+}
+
+.grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-4;
+}
+
+.card {
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(10, 30, 60, 0.06);
+  box-shadow: 0 18px 46px rgba(18, 46, 90, 0.07);
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 220px;
+
+  [data-theme='dark'] & {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.text {
+  color: $text-secondary;
+  font-weight: 650;
+  @include fluid-property('font-size', 13px, 12px);
+  line-height: 1.7;
+
+  [data-theme='dark'] & {
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.person {
+  margin-top: auto;
+  display: flex;
+  gap: $spacing-3;
+  align-items: center;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-full;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 153, 102, 0.95), transparent 58%),
+    radial-gradient(circle at 70% 70%, rgba(66, 170, 255, 0.55), transparent 58%),
+    rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(10, 30, 60, 0.06);
+  flex: 0 0 auto;
+
+  [data-theme='dark'] & {
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255, 153, 102, 0.4), transparent 58%),
+      radial-gradient(circle at 70% 70%, rgba(66, 170, 255, 0.35), transparent 58%),
+      rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.personText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.personName {
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  color: $text-primary;
+}
+
+.personRole {
+  @include fluid-property('font-size', 12px, 11px);
+  font-weight: 650;
+  color: $text-secondary;
+}
+
+.sep {
+  margin: 0 6px;
+  opacity: 0.6;
+}
+
+@media (max-width: $breakpoint-lg) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

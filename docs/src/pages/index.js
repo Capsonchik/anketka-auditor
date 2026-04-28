@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';

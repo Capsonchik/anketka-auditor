@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef } from 'react';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import { ChevronDownIcon, ChevronRightIcon } from '@shared/icons';
 import styles from './lang-switcher.module.scss';
 

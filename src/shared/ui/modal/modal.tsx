@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 import type { ModalProps } from './modal.types';
 import styles from './modal.module.scss';
 

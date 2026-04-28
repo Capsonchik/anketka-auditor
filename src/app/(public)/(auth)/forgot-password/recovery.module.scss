@@ -1,0 +1,76 @@
+.recovery {
+  display: flex;
+  flex-direction: column;
+  @include fade-in-up('bottom', 10px, 0.4s);
+  width: 100%;
+  max-width: 480px;
+}
+
+.title {
+  @include fluid-property('font-size', 28px, 24px);
+  font-weight: 900;
+  color: $text-primary;
+  margin: 0 0 $spacing-2;
+}
+
+.subtitle {
+  @include fluid-property('font-size', 15px, 14px);
+  color: $text-secondary;
+  font-weight: 500;
+  margin: 0 0 $spacing-8;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.submitBtn {
+  height: 52px;
+  @include fluid-property('font-size', 16px, 15px);
+  font-weight: 800;
+  text-transform: none;
+}
+
+.backToLogin {
+  margin-top: $spacing-6;
+  display: flex;
+  justify-content: center;
+}
+
+.link {
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-secondary;
+  text-decoration: none;
+  transition: color 150ms ease;
+
+  &:hover {
+    color: $primary-500;
+  }
+}
+
+.successIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(119, 221, 231, 0.2);
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-6;
+}

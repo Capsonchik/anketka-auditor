@@ -39,7 +39,13 @@ export const Header = () => {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.logo}>
-          <Logo width={160} height={44} />
+          <Link href="/" className={styles.brand} aria-label="Анкетка — на главную">
+            <span className={styles.brandMark} aria-hidden="true" />
+            <span className={styles.brandText}>
+              <span className={styles.brandTitle}>ANKETKA</span>
+              <span className={styles.brandSubtitle}>population survey service</span>
+            </span>
+          </Link>
         </div>
         
         <div className={styles.desktopNav}>
@@ -47,12 +53,20 @@ export const Header = () => {
         </div>
 
         <div className={styles.actions}>
-          <LangSwitcher />
-          <ColorPicker />
+          {/* <LangSwitcher /> */}
+          {/* <ColorPicker /> */}
           <ThemeToggle />
-          <Link href="/login" className={styles.loginBtn}>
-            <Button variant="primary" size="md">Личный кабинет</Button>
-          </Link>
+          <div className={styles.auth}>
+            <Link href="/login" prefetch className={styles.authLink}>
+              Вход
+            </Link>
+            <span className={styles.authSeparator} aria-hidden="true">
+              /
+            </span>
+            <Link href="/register" prefetch className={styles.authLink}>
+              Регистрация
+            </Link>
+          </div>
 
           <button 
             className={styles.burger} 

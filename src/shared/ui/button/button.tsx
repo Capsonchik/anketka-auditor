@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, MouseEvent, useLayoutEffect } from 'react';
-import clsx from 'clsx';
+import { clsx } from '@shared/lib/clsx';
 
 import styles from './button.module.scss';
 import animationStyles from './styles/animations.module.scss';
