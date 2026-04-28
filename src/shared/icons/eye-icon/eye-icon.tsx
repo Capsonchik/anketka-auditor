@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface EyeIconProps extends React.SVGProps<SVGSVGElement> {
+export interface EyeIconProps extends React.SVGProps<SVGSVGElement> {
   isOpen?: boolean;
 }
 
