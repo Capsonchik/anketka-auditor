@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Button, Logo } from '@shared/ui';
+import { Button, ButtonLink, Logo } from '@shared/ui';
 import { useTheme } from '@shared/hooks';
 import { DesktopMenu } from './ui/desktop-menu/desktop-menu';
 import { MobileMenu } from './ui/mobile-menu/mobile-menu';
@@ -12,8 +12,13 @@ import styles from './header.module.scss';
 import { ThemeToggle } from '@/features/theme-toggle';
 import { ColorPicker } from '@/features/color-picker';
 import { LangSwitcher } from '@/features/lang-switcher/ui/lang-switcher';
+import { Auditor } from '@/entities/auditor';
 
-export const Header = () => {
+interface AuditorHeaderProps {
+  auditor?: Auditor | null
+}
+
+export const Header = ({ auditor }:AuditorHeaderProps) => {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -35,6 +40,7 @@ export const Header = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  console.log(auditor)
   return (
     <header className={styles.header}>
       <div className={styles.container}>
@@ -47,7 +53,7 @@ export const Header = () => {
             </span>
           </Link>
         </div>
-        
+
         <div className={styles.desktopNav}>
           <DesktopMenu />
         </div>
@@ -56,19 +62,27 @@ export const Header = () => {
           {/* <LangSwitcher /> */}
           {/* <ColorPicker /> */}
           <ThemeToggle />
-          <div className={styles.auth}>
-            <Link href="/login" prefetch className={styles.authLink}>
-              Вход
-            </Link>
-            <span className={styles.authSeparator} aria-hidden="true">
-              /
-            </span>
-            <Link href="/register" prefetch className={styles.authLink}>
-              Регистрация
-            </Link>
-          </div>
+          {auditor
+            ? (
+              <ButtonLink href={'/auditor'}>{auditor.firstName}</ButtonLink>
+            )
+            : (
+              <div className={styles.auth}>
+                <Link href="/login" prefetch className={styles.authLink}>
+                  Вход
+                </Link>
+                <span className={styles.authSeparator} aria-hidden="true">
+                  /
+                </span>
+                <Link href="/register" prefetch className={styles.authLink}>
+                  Регистрация
+                </Link>
+              </div>
+            )
+          }
 
-          <button 
+
+          {/* <button 
             className={styles.burger} 
             onClick={() => setIsMobileMenuOpen(true)}
             aria-label="Открыть меню"
@@ -76,7 +90,7 @@ export const Header = () => {
             <span></span>
             <span></span>
             <span></span>
-          </button>
+          </button> */}
         </div>
       </div>
 

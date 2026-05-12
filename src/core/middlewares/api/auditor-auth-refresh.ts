@@ -1,7 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
-
 const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://survey-all.ru'
 
+/**
+ * Выполняет обновление токенов через API.
+ * 
+ * @param refreshToken - Токен обновления.
+ * @returns Данные с новыми токенами или null в случае ошибки.
+ */
 export async function auditorAuthRefresh(refreshToken: string) {
   try {
     console.log(`[AuditorAuthRefresh] Refreshing token at: ${API_URL}/api/v1/auditor-auth/refresh`)
@@ -16,15 +20,10 @@ export async function auditorAuthRefresh(refreshToken: string) {
       cache: 'no-store',
     })
 
-    console.log(`[AuditorAuthRefresh] Response status: ${response.status}`)
-
     if (response.ok) {
-      const data = await response.json()
-      console.log('[AuditorAuthRefresh] Refresh successful')
-      return data
+      return await response.json()
     }
     
-    console.log('[AuditorAuthRefresh] Refresh failed')
     return null
   } catch (error) {
     console.error('[AuditorAuthRefresh] Critical error:', error)

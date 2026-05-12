@@ -6,13 +6,15 @@ import { LandingManage } from '@/widgets/public/landing/manage/manage';
 import { LandingTestimonials } from '@/widgets/public/landing/testimonials/testimonials';
 import { LandingTariffs } from '@/widgets/public/landing/tariffs/tariffs';
 import { ScrollToTop } from '@shared/ui/scroll-to-top/scroll-to-top';
+import { getAuditorFromHeaders } from '@/entities/auditor/lib/get-auditor-from-headers';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const auditorData = await getAuditorFromHeaders();
 
   return (
     <>
       <ScrollToTop />
-      <Header />
+      <Header auditor={auditorData} />
       <main>
         <Hero />
         <LandingProjectVariants />

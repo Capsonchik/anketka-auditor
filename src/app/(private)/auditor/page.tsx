@@ -1,13 +1,7 @@
 import React from 'react'
-import { headers } from 'next/headers'
-import { decrypt } from '@shared/lib/crypto'
+import { getAuditorFromHeaders } from '@/entities/auditor/lib/get-auditor-from-headers'
+import { getAuditorRatingStatsFromHeaders } from '@/entities/stats/lib/get-auditor-rating-stats-from-headers'
 import styles from './page.module.scss'
-
-const MOCK_SUMMARY = [
-  { label: 'Активные проверки', value: 12, description: 'Требуют внимания', color: 'blue' },
-  { label: 'Просрочено', value: 3, description: 'Критический приоритет', color: 'red' },
-  { label: 'Завершено (мес)', value: 45, description: 'Всего за апрель', color: 'green' },
-]
 
 const MOCK_TASKS = [
   { id: 1, date: '28.04', title: 'Аудит склада №4', type: 'Выездная', due: '18:00' },
@@ -19,25 +13,38 @@ const MOCK_NOTIFICATIONS = [
   { date: '27.04 10:05', text: 'Отчет по аудиту №128 принят в работу' },
 ]
 
-export default async function AuditorPage() {  const headersList = await headers()
-  const userDataRaw = headersList.get('x-user-data')
-  
-  let auditor = null
-  if (userDataRaw) {
-    try {
-      const decryptedData = await decrypt(userDataRaw)
-      auditor = JSON.parse(decryptedData)
-    } catch (e) {
-      console.error('Failed to decrypt or parse auditor data in page', e)
-    }
-  }
+export default async function AuditorPage() {
+  const auditor = await getAuditorFromHeaders()
+  const stats = await getAuditorRatingStatsFromHeaders()
 
-  return (    <div className={styles.dashboard}>
+  const summary = [
+    {
+      label: 'Средний рейтинг',
+      value: stats?.avgRatingOutOf5?.toFixed(1) ?? '0.0',
+      description: `На основе ${stats?.evaluationsCount ?? 0} оценок`,
+      color: 'blue' as const,
+    },
+    {
+      label: 'Активные проверки',
+      value: stats?.activeChecksCount ?? 0,
+      description: 'Требуют внимания',
+      color: 'blue' as const,
+    },
+    {
+      label: 'Просрочено',
+      value: stats?.overdueChecksCount ?? 0,
+      description: 'Критический приоритет',
+      color: 'red' as const,
+    },
+  ]
+
+  return (
+    <div className={styles.dashboard}>
       <h1 className={styles.welcomeMessage}>
         Привет, {auditor?.firstName || 'Аудитор'}!
       </h1>
       <div className={styles.dashboardGrid}>
-        {MOCK_SUMMARY.map((item, idx) => (
+        {summary.map((item, idx) => (
           <div key={idx} className={`${styles.card} ${styles.cardClickable} ${item.color === 'red' ? styles.red : ''}`}>
             <h2>{item.label}</h2>
             <div className={styles.value}>{item.value}</div>

@@ -60,3 +60,17 @@ export async function decrypt(text: string): Promise<string> {
   
   return new TextDecoder().decode(decrypted)
 }
+
+/**
+ * Расшифровка payload из заголовка middleware (формат encrypt → JSON).
+ * Не импортирует `next/headers` — передайте сырое значение заголовка.
+ */
+export async function parseEncryptedJsonPayload<T>(raw: string | null): Promise<T | null> {
+  if (!raw) return null
+  try {
+    const decrypted = await decrypt(raw)
+    return JSON.parse(decrypted) as T
+  } catch {
+    return null
+  }
+}

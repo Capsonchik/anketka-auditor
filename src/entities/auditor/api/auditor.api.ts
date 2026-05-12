@@ -1,8 +1,5 @@
 import { api } from '@shared/api/api';
-import { 
-  MeResponse, 
-  ListAssignmentsResponse 
-} from '../model/types';
+import type { AuditorUpdateRequest, MeResponse } from '../model/types';
 
 export const auditorApi = api.injectEndpoints({
   endpoints: (build) => ({
@@ -10,13 +7,15 @@ export const auditorApi = api.injectEndpoints({
       query: () => '/api/v1/auditor/me',
       providesTags: ['User'],
     }),
-    getAssignments: build.query<ListAssignmentsResponse, void>({
-      query: () => '/api/v1/auditor/assignments',
+    updateAuditor: build.mutation<MeResponse, AuditorUpdateRequest>({
+      query: (body) => ({
+        url: '/api/v1/auditor/update',
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ['User'],
     }),
   }),
 });
 
-export const { 
-  useGetMeQuery, 
-  useGetAssignmentsQuery 
-} = auditorApi;
+export const { useGetMeQuery, useUpdateAuditorMutation } = auditorApi;

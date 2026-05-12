@@ -1,38 +1,58 @@
 export interface Auditor {
   id: string;
-  companyId: string;
+  publicId: number;
+  companyId: string | null;
+  accountId: string;
   firstName: string;
   lastName: string;
-  middleName: string;
-  email: string;
-  phone: string;
+  middleName: string | null;
+  phone: string | null;
+  email: string | null;
   city: string;
+  birthDate?: string | null;  // ISO date string
+  gender?: string | null;
+  age?: number | null;
+  visitLocations?: string | null;
+  education?: string | null;
+  companyActivity?: string | null;
+  experienceInfo?: string | null;
+  hasDriverLicense?: boolean | null;
+  driverCategories?: string | null;
+  hasCar?: boolean | null;
+  carInfo?: string | null;
+  jobSearchType?: string | null;
+  snils?: string | null;
+  passportData?: string | null;
+  isModerated: boolean;
+  createdAt: string;  // ISO datetime string
 }
 
 export interface MeResponse {
   auditor: Auditor;
 }
 
-export interface Assignment {
-  projectId: string;
-  projectName: string;
-  checkId: string;
-  checkName: string;
-  surveyId: string;
-  surveyTitle: string;
-  surveyCategory: string;
-  status: string;
-  checkStatus: string;
-  assignedAt: string;
-  acceptedAt: string;
-  declinedAt: string;
-  inProgressAt: string;
-  itemsCompleted: number;
-  itemsTotal: number;
-  revisionComment: string;
-  inviteToken: string;
-}
-
-export interface ListAssignmentsResponse {
-  items: Assignment[];
-}
+/** PATCH /api/v1/auditor/update — только переданные поля (camelCase, как в Pydantic). */
+export type AuditorUpdateRequest = Partial<
+  Pick<
+    Auditor,
+    | 'firstName'
+    | 'lastName'
+    | 'middleName'
+    | 'phone'
+    | 'city'
+    | 'birthDate'
+    | 'gender'
+    | 'age'
+    | 'visitLocations'
+    | 'education'
+    | 'companyActivity'
+    | 'experienceInfo'
+    | 'hasDriverLicense'
+    | 'driverCategories'
+    | 'hasCar'
+    | 'carInfo'
+    | 'jobSearchType'
+    | 'snils'
+    | 'passportData'
+  >
+>;

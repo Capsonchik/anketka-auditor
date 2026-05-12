@@ -1,26 +1,23 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { authMiddleware } from './core/middlewares/auth-middleware'
+import { createMiddleware } from './core/middlewares/shared/utils'
+import { homeAuditorHandler } from './core/middlewares/handlers/home-auditor'
+import { auditorAuthHandler } from './core/middlewares/handlers/auditor-auth'
+import { guestGuardHandler } from './core/middlewares/handlers/guest-guard'
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  console.log(`[Middleware] Global check: ${pathname}`)
-
-  // Выполняем проверку авторизации
-  const authResponse = await authMiddleware(request)
-  if (authResponse) {
-    return authResponse
-  }
-
-  // Дополнительная логика для страниц входа/регистрации
-  // const accessToken = request.cookies.get('accessToken')?.value
-  // if (accessToken && (pathname === '/login' || pathname === '/register')) {
-  //   return NextResponse.redirect(new URL('/lk', request.url))
-  // }
-
-  return NextResponse.next()
-}
-
+/**
+ * Глобальный диспетчер middleware.
+ * Маршрутизирует запросы на соответствующие обработчики в зависимости от пути.
+ */
+export const middleware = createMiddleware({
+  // Главная страница: подгружаем данные аудитора, если он авторизован
+  '/': homeAuditorHandler,
+  
+  // Гостевые страницы: если авторизован — редирект на главную
+  '/login': guestGuardHandler,
+  '/register': guestGuardHandler,
+  
+  // Приватная зона аудитора: строгая проверка авторизации и редиректы
+  '/auditor/*': auditorAuthHandler,
+})
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)']
 };

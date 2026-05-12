@@ -1,0 +1,59 @@
+.formContent {
+  padding: 24px 0;
+}
+
+.profileLayout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 40px;
+  margin-bottom: 32px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatarWrapper {
+  width: 160px;
+  height: 160px;
+  background: var(--color-primary-main);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.avatar {
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.roleBadge {
+  padding: 6px 16px;
+  background: rgba(var(--color-primary-rgb), 0.1);
+  color: var(--color-primary-main);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fieldsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}

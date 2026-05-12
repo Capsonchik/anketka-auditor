@@ -1,15 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { encrypt } from '@shared/lib/crypto'
 
 const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://survey-all.ru'
 
+/**
+ * Выполняет запрос к API для получения данных текущего аудитора.
+ * 
+ * @param request - Объект запроса Next.js.
+ * @param accessToken - Токен доступа.
+ * @returns Объект с заголовками и данными аудитора или Response в случае ошибки.
+ */
 export async function fetchAuditorMe(request: NextRequest, accessToken: string) {
-  const { pathname } = request.nextUrl
-  
-  if (!pathname.startsWith('/auditor')) {
-    return null
-  }
-
   try {
     console.log(`[FetchAuditorMe] Fetching: ${API_URL}/api/v1/auditor/me`)
     const response = await fetch(`${API_URL}/api/v1/auditor/me`, {
@@ -26,7 +27,6 @@ export async function fetchAuditorMe(request: NextRequest, accessToken: string) 
 
     if (response.ok) {
       const data = await response.json()
-      console.log('[FetchAuditorMe] Data received:', JSON.stringify(data))
       const auditor = data.auditor || data
       
       const requestHeaders = new Headers(request.headers)
@@ -45,7 +45,7 @@ export async function fetchAuditorMe(request: NextRequest, accessToken: string) 
     
     return response
   } catch (error) {
-    console.error('Fetch auditor me error:', error)
+    console.error('[FetchAuditorMe] Error:', error)
     return null
   }
 }

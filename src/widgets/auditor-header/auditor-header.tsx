@@ -4,12 +4,10 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { clsx } from '@shared/lib/clsx'
 import styles from './auditor-header.module.scss'
+import { Auditor } from '@/entities/auditor'
 
 interface AuditorHeaderProps {
-  auditor?: {
-    firstName: string
-    lastName: string
-  } | null
+  auditor?: Auditor | null
 }
 
 export const AuditorHeader = ({ auditor }: AuditorHeaderProps) => {
