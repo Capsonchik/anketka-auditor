@@ -7,15 +7,30 @@ import type {
   PublicPaSubmitBody,
 } from '../model/types'
 
+export type GetPublicPaDraftArg = {
+  token: string
+  checkId?: string | null
+}
+
 export const publicPaApi = api.injectEndpoints({
   endpoints: (build) => ({
     getPublicPa: build.query<PublicPaSession, string>({
       query: (token) => `/api/v1/public/pa/${token}`,
       providesTags: (_r, _e, token) => [{ type: 'PublicPa', id: token }],
     }),
-    getPublicPaDraft: build.query<PublicPaDraftResponse, string>({
-      query: (token) => `/api/v1/public/pa/${token}/draft`,
-      providesTags: (_r, _e, token) => [{ type: 'PublicPaDraft', id: token }],
+    getPublicPaDraft: build.query<PublicPaDraftResponse, GetPublicPaDraftArg | string>({
+      query: (arg) => {
+        const token = typeof arg === 'string' ? arg : arg.token
+        const checkId = typeof arg === 'string' ? undefined : arg.checkId || undefined
+        return {
+          url: `/api/v1/public/pa/${token}/draft`,
+          params: checkId ? { checkId } : undefined,
+        }
+      },
+      providesTags: (_r, _e, arg) => {
+        const token = typeof arg === 'string' ? arg : arg.token
+        return [{ type: 'PublicPaDraft', id: token }]
+      },
     }),
     savePublicPaDraft: build.mutation<
       PublicPaDraftSaveResponse,

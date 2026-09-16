@@ -79,9 +79,12 @@ export default function AssignmentCheckPage({ params }: PageProps) {
   const paQuery = useGetPublicPaQuery(inviteToken || '', {
     skip: !canLoadPa || !inviteToken,
   })
-  const draftQuery = useGetPublicPaDraftQuery(inviteToken || '', {
-    skip: !canLoadPa || !inviteToken,
-  })
+  const draftQuery = useGetPublicPaDraftQuery(
+    { token: inviteToken || '', checkId },
+    {
+      skip: !canLoadPa || !inviteToken,
+    },
+  )
 
   const initialAnswers = useMemo(() => {
     const draft = draftQuery.data?.draft ?? null

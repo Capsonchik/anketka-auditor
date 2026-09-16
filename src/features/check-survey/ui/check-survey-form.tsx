@@ -226,12 +226,12 @@ export function CheckSurveyForm({
 
   const locked = submittedLocally || isAssignmentLocked(assignment)
 
-  // Черновик подмешиваем только пока пользователь ещё не начал ввод.
+  // Черновик / отправленные ответы: не затираем локальный ввод, кроме режима просмотра.
   useEffect(() => {
-    if (dirtyRef.current) return
     if (Object.keys(initialAnswers).length === 0) return
-    setAnswers((prev) => ({ ...initialAnswers, ...prev }))
-  }, [initialAnswers])
+    if (dirtyRef.current && !locked) return
+    setAnswers((prev) => (locked ? { ...initialAnswers } : { ...initialAnswers, ...prev }))
+  }, [initialAnswers, locked])
 
   const missingRequired = useMemo(() => listMissingRequired(pages, answers), [pages, answers])
   const unfilled = useMemo(() => listUnfilled(pages, answers), [pages, answers])
