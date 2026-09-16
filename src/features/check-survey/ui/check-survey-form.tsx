@@ -173,32 +173,37 @@ function QuestionField({
   )
 }
 
-function extractAnswersFromDraft(draft: Record<string, unknown> | null | undefined): AnswersMap {
-  if (!draft || typeof draft !== 'object') return {}
-  const nested = draft.answers
-  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
-    const screening =
-      (nested as Record<string, unknown>).screening &&
-      typeof (nested as Record<string, unknown>).screening === 'object'
-        ? ((nested as Record<string, unknown>).screening as Record<string, unknown>)
-        : {}
-    const product =
-      (nested as Record<string, unknown>).product &&
-      typeof (nested as Record<string, unknown>).product === 'object'
-        ? ((nested as Record<string, unknown>).product as Record<string, unknown>)
-        : {}
-    const flat =
-      Object.keys(screening).length || Object.keys(product).length
-        ? { ...screening, ...product }
-        : (nested as Record<string, unknown>)
-    const out: AnswersMap = {}
-    for (const [k, v] of Object.entries(flat)) {
-      if (v == null) continue
+function flattenAnswersTree(nested: Record<string, unknown>): AnswersMap {
+  const out: AnswersMap = {}
+  const take = (source: Record<string, unknown>) => {
+    for (const [k, v] of Object.entries(source)) {
+      if (k === 'screening' || k === 'product') continue
+      if (v == null || typeof v === 'object') continue
       if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
         out[k] = String(v)
       }
     }
-    return out
+  }
+
+  take(nested)
+  const screening =
+    nested.screening && typeof nested.screening === 'object' && !Array.isArray(nested.screening)
+      ? (nested.screening as Record<string, unknown>)
+      : null
+  const product =
+    nested.product && typeof nested.product === 'object' && !Array.isArray(nested.product)
+      ? (nested.product as Record<string, unknown>)
+      : null
+  if (screening) take(screening)
+  if (product) take(product)
+  return out
+}
+
+function extractAnswersFromDraft(draft: Record<string, unknown> | null | undefined): AnswersMap {
+  if (!draft || typeof draft !== 'object') return {}
+  const nested = draft.answers
+  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+    return flattenAnswersTree(nested as Record<string, unknown>)
   }
   return {}
 }
