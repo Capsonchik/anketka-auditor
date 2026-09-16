@@ -21,8 +21,8 @@ export interface Assignment {
   acceptedAt: string | null;
   declinedAt: string | null;
   inProgressAt: string | null;
-  itemsCompleted: number;
-  itemsTotal: number;
+  itemsCompleted: number | null;
+  itemsTotal: number | null;
   revisionComment: string | null;
   opsRevisionThreads: RevisionThread[];
   inviteToken: string;

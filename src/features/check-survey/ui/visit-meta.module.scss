@@ -1,0 +1,81 @@
+.root {
+  margin-bottom: $spacing-5;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-3;
+  margin-bottom: $spacing-4;
+}
+
+.title {
+  @include fluid-property(font-size, 24px, 20px);
+  margin: 0;
+  color: $text-primary;
+  font-weight: $font-weight-medium;
+  flex: 1 1 220px;
+}
+
+.timer {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $danger;
+  white-space: nowrap;
+}
+
+.card {
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  padding: $spacing-4;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+
+  p {
+    margin: $spacing-1 0;
+  }
+
+  strong {
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.statusAssigned {
+  background: rgba($primary, 0.1);
+  color: $primary;
+}
+
+.statusInProgress {
+  background: rgba($warning, 0.12);
+  color: $warning;
+}
+
+.statusOverdue {
+  background: rgba($danger, 0.1);
+  color: $danger;
+}
+
+.statusCompleted {
+  background: rgba($success, 0.1);
+  color: $success;
+}
