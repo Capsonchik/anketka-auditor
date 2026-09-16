@@ -23,6 +23,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
           <Link
             key={tab.id}
             href={tab.href}
+            prefetch={false}
             className={clsx(styles.tabBtn, { [styles.active]: pathname === tab.href })}
           >
             {tab.label}

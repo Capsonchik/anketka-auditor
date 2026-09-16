@@ -48,6 +48,7 @@ export const NavigationBar = () => {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               className={clsx(styles.dropdownItem, { [styles.active]: pathname === item.href })}
               onClick={() => setIsOpen(false)}
             >
@@ -67,6 +68,7 @@ export const NavigationBar = () => {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               className={clsx(styles.navItem, { [styles.active]: pathname === item.href })}
               onClick={() => setIsOpen(false)}
             >
