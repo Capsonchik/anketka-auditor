@@ -1,0 +1,33 @@
+.page {
+  display: flex;
+  flex-direction: column;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: $spacing-4;
+  color: $primary;
+  text-decoration: none;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  width: fit-content;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.title {
+  @include fluid-property(font-size, 24px, 20px);
+  margin: 0 0 $spacing-4;
+  color: $text-primary;
+}
+
+.bannerError {
+  padding: $spacing-3 $spacing-4;
+  border-radius: $radius-md;
+  background: rgba($danger, 0.08);
+  color: $danger;
+  font-size: $font-size-sm;
+}

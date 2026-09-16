@@ -30,6 +30,6 @@ export const api = createApi({
       return headers
     },
   }),
-  tagTypes: ['User', 'Auth', 'Assignments', 'MapMarkers', 'MapFilters'],
+  tagTypes: ['User', 'Auth', 'Assignments', 'MapMarkers', 'MapFilters', 'PublicPa', 'PublicPaDraft'],
   endpoints: () => ({}),
 })

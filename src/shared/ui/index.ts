@@ -11,6 +11,8 @@ export * from './modal';
 export * from './logo';
 export * from './scroll-to-top';
 export * from './form-field';
+export * from './progress-bar';
+export * from './file-field';
 export * from './scroll-reveal';
 export * from './error-fallback';
 export * from './loader/loader';

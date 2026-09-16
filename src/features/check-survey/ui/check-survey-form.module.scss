@@ -1,0 +1,86 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+  padding-bottom: $spacing-6;
+}
+
+.progress {
+  margin-bottom: $spacing-5;
+}
+
+.section {
+  margin-bottom: $spacing-5;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+  margin: 0 0 $spacing-3;
+  padding-bottom: $spacing-2;
+  border-bottom: 1px solid $border-color;
+}
+
+.fields,
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.card {
+  padding: $spacing-4;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  background: $bg-primary;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.field {
+  width: 100%;
+}
+
+.notice {
+  margin-bottom: $spacing-3;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-md;
+  background: rgba($primary, 0.08);
+  color: $primary;
+  font-size: $font-size-sm;
+}
+
+.bannerError {
+  margin-bottom: $spacing-3;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-md;
+  background: rgba($danger, 0.08);
+  color: $danger;
+  font-size: $font-size-sm;
+}
+
+.empty {
+  color: $text-secondary;
+  font-size: $font-size-sm;
+}
+
+.actions {
+  position: static;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: $spacing-2;
+  padding: $spacing-3 0;
+  margin-top: $spacing-4;
+  background: transparent;
+  border-top: 1px solid $border-color;
+
+  @media (max-width: $breakpoint-md) {
+    justify-content: stretch;
+
+    > * {
+      flex: 1 1 auto;
+    }
+  }
+}
