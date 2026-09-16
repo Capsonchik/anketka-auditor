@@ -6,7 +6,7 @@ import styles from './page.module.scss'
 export default function MapPage() {
   return (
     <div className={styles.mapPage}>
-      <h1>Карта Заданий</h1>
+      <h1>Карта Заданий 2</h1>
 
       <div className={styles.filterPanel}>
         <input type="text" placeholder="ID проверки" />
