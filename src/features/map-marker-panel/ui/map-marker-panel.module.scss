@@ -1,0 +1,79 @@
+.panel {
+  position: absolute;
+  right: $spacing-4;
+  top: $spacing-4;
+  width: min(360px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
+  overflow: auto;
+  background: $bg-primary;
+  border-radius: $radius-lg;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
+  z-index: 5;
+  padding: $spacing-4;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-2;
+  align-items: flex-start;
+  margin-bottom: $spacing-3;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+.close {
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: $text-secondary;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-bottom: $spacing-4;
+}
+
+.status {
+  color: $text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.hint,
+.pending {
+  color: $text-primary;
+}
+
+.error {
+  color: $danger;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+  align-items: center;
+}
+
+.link {
+  color: $text-primary;
+  text-decoration: underline;
+  font-size: $font-size-sm;
+}
+
+@media (max-width: $breakpoint-md) {
+  .panel {
+    right: $spacing-2;
+    left: $spacing-2;
+    top: auto;
+    bottom: $spacing-2;
+    width: auto;
+    max-height: 45%;
+  }
+}

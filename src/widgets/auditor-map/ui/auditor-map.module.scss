@@ -1,0 +1,81 @@
+.root {
+  position: relative;
+  min-height: 420px;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  margin-bottom: $spacing-4;
+  background:
+    linear-gradient(180deg, rgba(148, 163, 184, 0.18), rgba(226, 232, 240, 0.65)),
+    $gray-200;
+}
+
+.canvas {
+  width: 100%;
+  height: 420px;
+}
+
+.cssLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cssMarker {
+  pointer-events: auto;
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: $radius-full;
+  border: 2px solid $bg-primary;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: $gray-50;
+  font-weight: $font-weight-medium;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  transition: transform $transition-fast, box-shadow $transition-normal;
+
+  &:hover {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+.cssMarkerActive {
+  box-shadow: 0 0 0 3px rgba(31, 140, 235, 0.45), 0 4px 10px rgba(15, 23, 42, 0.3);
+}
+
+.status_assigned { background-color: $primary; }
+.status_in_progress { background-color: $warning; }
+.status_completed { background-color: $success; }
+.status_overdue { background-color: $danger; }
+.status_free { background-color: $gray-500; opacity: 0.8; }
+
+.overlay,
+.empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-secondary;
+  font-size: $font-size-base;
+  pointer-events: none;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.engineHint {
+  position: absolute;
+  left: $spacing-3;
+  bottom: $spacing-3;
+  z-index: 4;
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: $radius-md;
+  padding: 4px 8px;
+}

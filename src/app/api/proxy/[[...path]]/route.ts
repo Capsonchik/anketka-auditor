@@ -53,8 +53,24 @@ async function handleProxy(request: NextRequest) {
       cache: 'no-store',
     });
 
-    const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    if (response.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
+
+    const text = await response.text();
+    if (!text) {
+      return new NextResponse(null, { status: response.status });
+    }
+
+    try {
+      const data = JSON.parse(text);
+      return NextResponse.json(data, { status: response.status });
+    } catch {
+      return new NextResponse(text, {
+        status: response.status,
+        headers: { 'Content-Type': response.headers.get('Content-Type') || 'text/plain' },
+      });
+    }
   } catch (error) {
     console.error('[Proxy] Error:', error);
     return NextResponse.json({ error: 'Proxy error' }, { status: 500 });

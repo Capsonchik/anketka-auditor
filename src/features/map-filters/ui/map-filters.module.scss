@@ -1,0 +1,49 @@
+.root {
+  margin-bottom: $spacing-4;
+  padding: $spacing-3 $spacing-4;
+  background-color: $bg-primary;
+  border-radius: $radius-lg;
+  border: 1px solid $border-color;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+  align-items: center;
+}
+
+.input {
+  min-width: 220px;
+  flex: 1 1 220px;
+  height: 38px;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  padding: 0 $spacing-2;
+  background: $bg-primary;
+  color: $text-primary;
+  font-size: $font-size-sm;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
+}
+
+.meta {
+  margin-top: $spacing-2;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+@media (max-width: $breakpoint-md) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .input {
+    width: 100%;
+    min-width: unset;
+  }
+}
