@@ -67,5 +67,13 @@ export type PublicPaSubmitBody = {
 }
 
 export function questionAnswerKey(question: PublicPaQuestion): string {
-  return (question.code || question.id).trim()
+  const code = String(question.code ?? '').trim()
+  if (code) return code
+  const configCode = String(
+    question.config && typeof question.config === 'object'
+      ? (question.config as Record<string, unknown>).code ?? ''
+      : '',
+  ).trim()
+  if (configCode) return configCode
+  return String(question.id ?? '').trim()
 }

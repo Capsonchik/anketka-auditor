@@ -83,10 +83,10 @@ export default function AssignmentCheckPage({ params }: PageProps) {
     skip: !canLoadPa || !inviteToken,
   })
 
-  const initialAnswers = useMemo(
-    () => extractAnswersFromDraft(draftQuery.data?.draft ?? null),
-    [draftQuery.data?.draft],
-  )
+  const initialAnswers = useMemo(() => {
+    const draft = draftQuery.data?.draft ?? null
+    return extractAnswersFromDraft(draft)
+  }, [draftQuery.data?.draft])
 
   if (assignmentQuery.isLoading) {
     return (

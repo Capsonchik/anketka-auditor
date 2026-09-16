@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Assignment } from '@/entities/assignment/model/types'
 import {
@@ -35,10 +35,23 @@ function isFilled(value: string | undefined): boolean {
   return Boolean(value && String(value).trim())
 }
 
+function listQuestions(pages: PublicPaPage[]): PublicPaQuestion[] {
+  return pages.flatMap((page) =>
+    [...(page.questions || [])].sort((a, b) => a.sortOrder - b.sortOrder),
+  )
+}
+
+function listMissingRequired(pages: PublicPaPage[], answers: AnswersMap): PublicPaQuestion[] {
+  return listQuestions(pages).filter(
+    (q) => q.required && !isFilled(answers[questionAnswerKey(q)]),
+  )
+}
+
 function calcProgress(pages: PublicPaPage[], answers: AnswersMap): number {
-  const required = pages.flatMap((p) => p.questions.filter((q) => q.required))
-  if (required.length === 0) return 0
-  const filled = required.filter((q) => isFilled(answers[questionAnswerKey(q)])).length
+  const required = listQuestions(pages).filter((q) => q.required)
+  if (required.length === 0) return 100
+  const missing = listMissingRequired(pages, answers).length
+  const filled = required.length - missing
   return Math.round((filled / required.length) * 100)
 }
 
@@ -56,16 +69,23 @@ function QuestionField({
     value: o.value,
     label: o.label,
   }))
+  const isChoice =
+    options.length > 0 &&
+    (type.includes('single') ||
+      type === 'radio' ||
+      type === 'select' ||
+      type.includes('choice') ||
+      options.length <= 6)
 
-  if (options.length > 0 && (type.includes('single') || type === 'radio' || type === 'select' || options.length <= 4)) {
-    if (options.length <= 4) {
+  if (isChoice) {
+    if (options.length <= 6) {
       return (
         <FormField label={question.title} required={question.required} hint={question.description || undefined}>
           <PillSwitchFlexible
             name={questionAnswerKey(question)}
             size="small"
             data={options}
-            value={value || options[0]?.value || ''}
+            value={value || ''}
             onChange={(next) => onChange(String(next))}
           />
         </FormField>
@@ -85,7 +105,7 @@ function QuestionField({
     )
   }
 
-  if (type.includes('text') && (type.includes('area') || type === 'textarea' || type === 'long_text')) {
+  if (type.includes('area') || type === 'textarea' || type === 'long_text') {
     return (
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
         <Textarea
@@ -102,12 +122,7 @@ function QuestionField({
   if (type.includes('number') || type === 'integer' || type === 'decimal') {
     return (
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-        <Input
-          block
-          type="number"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
+        <Input block type="number" value={value} onChange={(e) => onChange(e.target.value)} />
       </FormField>
     )
   }
@@ -160,22 +175,29 @@ export function CheckSurveyForm({
     [session.builder?.pages],
   )
 
-  const [answers, setAnswers] = useState<AnswersMap>(initialAnswers)
+  const [answers, setAnswers] = useState<AnswersMap>({})
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const dirtyRef = useRef(false)
 
   const [saveDraft, saveState] = useSavePublicPaDraftMutation()
   const [submitPa, submitState] = useSubmitPublicPaMutation()
 
+  // Черновик подмешиваем только пока пользователь ещё не начал ввод.
   useEffect(() => {
-    setAnswers(initialAnswers)
+    if (dirtyRef.current) return
+    if (Object.keys(initialAnswers).length === 0) return
+    setAnswers((prev) => ({ ...initialAnswers, ...prev }))
   }, [initialAnswers])
 
+  const missingRequired = useMemo(() => listMissingRequired(pages, answers), [pages, answers])
   const progress = useMemo(() => calcProgress(pages, answers), [pages, answers])
   const busy = saveState.isLoading || submitState.isLoading || isBootstrapping
   const context = { checkId: assignment.checkId }
 
   const setAnswer = (key: string, value: string) => {
+    if (!key) return
+    dirtyRef.current = true
     setAnswers((prev) => ({ ...prev, [key]: value }))
     setNotice(null)
     setError(null)
@@ -203,8 +225,13 @@ export function CheckSurveyForm({
 
   const handleSubmit = async () => {
     setError(null)
-    if (progress < 100) {
-      setError('Заполните все обязательные поля перед отправкой')
+    if (missingRequired.length > 0) {
+      const titles = missingRequired
+        .map((q) => q.title?.trim() || questionAnswerKey(q))
+        .filter(Boolean)
+      const preview = titles.slice(0, 8).join(', ')
+      const more = titles.length > 8 ? ` и ещё ${titles.length - 8}` : ''
+      setError(`Не заполнены обязательные поля (${titles.length}): ${preview}${more}`)
       return
     }
     try {
@@ -242,7 +269,7 @@ export function CheckSurveyForm({
       <ProgressBar
         className={styles.progress}
         value={progress}
-        label="Прогресс заполнения"
+        label={`Прогресс заполнения${missingRequired.length ? ` · осталось ${missingRequired.length}` : ''}`}
       />
 
       {pages.length === 0 ? (
@@ -256,8 +283,12 @@ export function CheckSurveyForm({
                 .sort((a, b) => a.sortOrder - b.sortOrder)
                 .map((question) => {
                   const key = questionAnswerKey(question)
+                  const missing = question.required && !isFilled(answers[key])
                   return (
-                    <div key={question.id} className={styles.field}>
+                    <div
+                      key={question.id}
+                      className={missing ? `${styles.field} ${styles.fieldMissing}` : styles.field}
+                    >
                       <QuestionField
                         question={question}
                         value={answers[key] || ''}
@@ -275,10 +306,16 @@ export function CheckSurveyForm({
       {notice && !error ? <div className={styles.notice}>{notice}</div> : null}
 
       <div className={styles.actions}>
-        <Button variant="default" appearance="ghost" disabled={busy} onClick={handleSaveDraft}>
+        <Button type="button" variant="default" appearance="ghost" disabled={busy} onClick={handleSaveDraft}>
           Сохранить черновик
         </Button>
-        <Button variant="primary" disabled={busy} loading={submitState.isLoading} onClick={handleSubmit}>
+        <Button
+          type="button"
+          variant="primary"
+          disabled={busy}
+          loading={submitState.isLoading}
+          onClick={handleSubmit}
+        >
           Отправить
         </Button>
       </div>

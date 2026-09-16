@@ -41,6 +41,13 @@
   width: 100%;
 }
 
+.fieldMissing {
+  padding: $spacing-2;
+  border-radius: $radius-md;
+  outline: 1px solid rgba($danger, 0.35);
+  background: rgba($danger, 0.04);
+}
+
 .notice {
   margin-bottom: $spacing-3;
   padding: $spacing-2 $spacing-3;
