@@ -29,10 +29,22 @@ type CheckSurveyFormProps = {
   session: PublicPaSession
   initialAnswers?: AnswersMap
   isBootstrapping?: boolean
+  onSubmitted?: () => void | Promise<void>
 }
 
 function isFilled(value: string | undefined): boolean {
   return Boolean(value && String(value).trim())
+}
+
+function isAssignmentLocked(assignment: Assignment): boolean {
+  const status = String(assignment.status || '').toLowerCase()
+  const checkStatus = String(assignment.checkStatus || '').toLowerCase()
+  return (
+    status === 'completed' ||
+    checkStatus === 'passed' ||
+    checkStatus === 'completed' ||
+    checkStatus === 'approved'
+  )
 }
 
 function listQuestions(pages: PublicPaPage[]): PublicPaQuestion[] {
@@ -47,22 +59,28 @@ function listMissingRequired(pages: PublicPaPage[], answers: AnswersMap): Public
   )
 }
 
+function listUnfilled(pages: PublicPaPage[], answers: AnswersMap): PublicPaQuestion[] {
+  return listQuestions(pages).filter((q) => !isFilled(answers[questionAnswerKey(q)]))
+}
+
+/** Прогресс по всем видимым вопросам — иначе необязательные поля дают ложные 100%. */
 function calcProgress(pages: PublicPaPage[], answers: AnswersMap): number {
-  const required = listQuestions(pages).filter((q) => q.required)
-  if (required.length === 0) return 100
-  const missing = listMissingRequired(pages, answers).length
-  const filled = required.length - missing
-  return Math.round((filled / required.length) * 100)
+  const all = listQuestions(pages)
+  if (all.length === 0) return 100
+  const filled = all.length - listUnfilled(pages, answers).length
+  return Math.round((filled / all.length) * 100)
 }
 
 function QuestionField({
   question,
   value,
   onChange,
+  readOnly,
 }: {
   question: PublicPaQuestion
   value: string
   onChange: (next: string) => void
+  readOnly?: boolean
 }) {
   const type = String(question.type || '').toLowerCase()
   const options = (question.options || []).map((o) => ({
@@ -86,7 +104,10 @@ function QuestionField({
             size="small"
             data={options}
             value={value || ''}
-            onChange={(next) => onChange(String(next))}
+            onChange={(next) => {
+              if (readOnly) return
+              onChange(String(next))
+            }}
           />
         </FormField>
       )
@@ -95,11 +116,14 @@ function QuestionField({
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
         <SelectPicker
           block
-          cleanable
+          cleanable={!readOnly}
           placeholder="Выберите"
           items={options}
           value={value || null}
-          onChange={(next) => onChange(next == null ? '' : String(next))}
+          onChange={(next) => {
+            if (readOnly) return
+            onChange(next == null ? '' : String(next))
+          }}
         />
       </FormField>
     )
@@ -112,6 +136,8 @@ function QuestionField({
           block
           rows={3}
           value={value}
+          disabled={readOnly}
+          readOnly={readOnly}
           onChange={(e) => onChange(e.target.value)}
           placeholder={question.description || undefined}
         />
@@ -122,14 +148,27 @@ function QuestionField({
   if (type.includes('number') || type === 'integer' || type === 'decimal') {
     return (
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-        <Input block type="number" value={value} onChange={(e) => onChange(e.target.value)} />
+        <Input
+          block
+          type="number"
+          value={value}
+          disabled={readOnly}
+          readOnly={readOnly}
+          onChange={(e) => onChange(e.target.value)}
+        />
       </FormField>
     )
   }
 
   return (
     <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-      <Input block value={value} onChange={(e) => onChange(e.target.value)} />
+      <Input
+        block
+        value={value}
+        disabled={readOnly}
+        readOnly={readOnly}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </FormField>
   )
 }
@@ -169,6 +208,7 @@ export function CheckSurveyForm({
   session,
   initialAnswers = {},
   isBootstrapping = false,
+  onSubmitted,
 }: CheckSurveyFormProps) {
   const pages = useMemo(
     () => [...(session.builder?.pages || [])].sort((a, b) => a.sortOrder - b.sortOrder),
@@ -178,10 +218,13 @@ export function CheckSurveyForm({
   const [answers, setAnswers] = useState<AnswersMap>({})
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [submittedLocally, setSubmittedLocally] = useState(false)
   const dirtyRef = useRef(false)
 
   const [saveDraft, saveState] = useSavePublicPaDraftMutation()
   const [submitPa, submitState] = useSubmitPublicPaMutation()
+
+  const locked = submittedLocally || isAssignmentLocked(assignment)
 
   // Черновик подмешиваем только пока пользователь ещё не начал ввод.
   useEffect(() => {
@@ -191,12 +234,13 @@ export function CheckSurveyForm({
   }, [initialAnswers])
 
   const missingRequired = useMemo(() => listMissingRequired(pages, answers), [pages, answers])
+  const unfilled = useMemo(() => listUnfilled(pages, answers), [pages, answers])
   const progress = useMemo(() => calcProgress(pages, answers), [pages, answers])
   const busy = saveState.isLoading || submitState.isLoading || isBootstrapping
   const context = { checkId: assignment.checkId }
 
   const setAnswer = (key: string, value: string) => {
-    if (!key) return
+    if (!key || locked) return
     dirtyRef.current = true
     setAnswers((prev) => ({ ...prev, [key]: value }))
     setNotice(null)
@@ -204,6 +248,7 @@ export function CheckSurveyForm({
   }
 
   const handleSaveDraft = async () => {
+    if (locked) return
     setError(null)
     try {
       await saveDraft({
@@ -224,6 +269,7 @@ export function CheckSurveyForm({
   }
 
   const handleSubmit = async () => {
+    if (locked) return
     setError(null)
     if (missingRequired.length > 0) {
       const titles = missingRequired
@@ -243,7 +289,10 @@ export function CheckSurveyForm({
           context,
         },
       }).unwrap()
-      setNotice('Анкета отправлена')
+      setSubmittedLocally(true)
+      setNotice(null)
+      setError(null)
+      await onSubmitted?.()
     } catch (err) {
       const detail =
         err && typeof err === 'object' && 'data' in err
@@ -269,7 +318,11 @@ export function CheckSurveyForm({
       <ProgressBar
         className={styles.progress}
         value={progress}
-        label={`Прогресс заполнения${missingRequired.length ? ` · осталось ${missingRequired.length}` : ''}`}
+        label={
+          locked
+            ? 'Прогресс заполнения'
+            : `Прогресс заполнения${unfilled.length ? ` · осталось ${unfilled.length}` : ''}`
+        }
       />
 
       {pages.length === 0 ? (
@@ -283,7 +336,7 @@ export function CheckSurveyForm({
                 .sort((a, b) => a.sortOrder - b.sortOrder)
                 .map((question) => {
                   const key = questionAnswerKey(question)
-                  const missing = question.required && !isFilled(answers[key])
+                  const missing = !locked && question.required && !isFilled(answers[key])
                   return (
                     <div
                       key={question.id}
@@ -292,6 +345,7 @@ export function CheckSurveyForm({
                       <QuestionField
                         question={question}
                         value={answers[key] || ''}
+                        readOnly={locked}
                         onChange={(next) => setAnswer(key, next)}
                       />
                     </div>
@@ -303,22 +357,32 @@ export function CheckSurveyForm({
       )}
 
       {error ? <div className={styles.bannerError}>{error}</div> : null}
-      {notice && !error ? <div className={styles.notice}>{notice}</div> : null}
+      {notice && !error && !locked ? <div className={styles.notice}>{notice}</div> : null}
 
-      <div className={styles.actions}>
-        <Button type="button" variant="default" appearance="ghost" disabled={busy} onClick={handleSaveDraft}>
-          Сохранить черновик
-        </Button>
-        <Button
-          type="button"
-          variant="primary"
-          disabled={busy}
-          loading={submitState.isLoading}
-          onClick={handleSubmit}
-        >
-          Отправить
-        </Button>
-      </div>
+      {locked ? (
+        <div className={styles.submittedBox}>
+          <p className={styles.submittedTitle}>Анкета уже отправлена</p>
+          <p className={styles.submittedText}>
+            Ответы приняты, повторная отправка и сохранение черновика недоступны. При необходимости
+            свяжитесь с поддержкой или дождитесь доработки от координатора.
+          </p>
+        </div>
+      ) : (
+        <div className={styles.actions}>
+          <Button type="button" variant="default" appearance="ghost" disabled={busy} onClick={handleSaveDraft}>
+            Сохранить черновик
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            disabled={busy}
+            loading={submitState.isLoading}
+            onClick={handleSubmit}
+          >
+            Отправить
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

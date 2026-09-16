@@ -170,6 +170,9 @@ export default function AssignmentCheckPage({ params }: PageProps) {
         assignment={assignment}
         session={paQuery.data}
         initialAnswers={initialAnswers}
+        onSubmitted={async () => {
+          await assignmentQuery.refetch()
+        }}
       />
     </div>
   )
