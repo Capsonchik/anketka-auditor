@@ -8,10 +8,10 @@ import { guestGuardHandler } from './core/middlewares/handlers/guest-guard'
  * Маршрутизирует запросы на соответствующие обработчики в зависимости от пути.
  */
 export const middleware = createMiddleware({
-  // Главная страница: подгружаем данные аудитора, если он авторизован
+  // Главная: лендинг отключён — гость → /login, авторизованный → /auditor
   '/': homeAuditorHandler,
   
-  // Гостевые страницы: если авторизован — редирект на главную
+  // Гостевые страницы: если авторизован — редирект в кабинет
   '/login': guestGuardHandler,
   '/register': guestGuardHandler,
   

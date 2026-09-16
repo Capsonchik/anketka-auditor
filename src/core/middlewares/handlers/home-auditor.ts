@@ -2,11 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { fetchAuditorMe } from '../api/fetch-auditor-me'
 
 /**
- * Обработчик для главной страницы.
- * Проверяет наличие токена и подгружает данные аудитора в заголовки без редиректов.
- * 
- * @param request - Объект запроса Next.js.
- * @returns NextResponse с модифицированными заголовками или null.
+ * Главная `/`: лендинг отключён.
+ * Авторизованный → /auditor, гость → /login.
  */
 export async function homeAuditorHandler(request: NextRequest) {
   const accessToken = request.cookies.get('accessToken')?.value
@@ -14,23 +11,17 @@ export async function homeAuditorHandler(request: NextRequest) {
   if (accessToken) {
     const result = (await fetchAuditorMe(request, accessToken)) as any
 
-    // Если запрос успешен, возвращаем NextResponse.next с новыми заголовками
     if (result && 'headers' in result) {
-      return NextResponse.next({
-        request: {
-          headers: result.headers,
-        },
-      })
+      return NextResponse.redirect(new URL('/auditor', request.url))
     }
 
-    // Если токен невалиден (401), очищаем куки
     if (result instanceof Response && result.status === 401) {
-      const response = NextResponse.next()
+      const response = NextResponse.redirect(new URL('/login', request.url))
       response.cookies.delete('accessToken')
       response.cookies.delete('refreshToken')
       return response
     }
   }
 
-  return null
+  return NextResponse.redirect(new URL('/login', request.url))
 }

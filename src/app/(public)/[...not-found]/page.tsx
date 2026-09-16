@@ -14,9 +14,8 @@ export default function NotFoundPage() {
   const router = useRouter();
 
   const handleGoHome = () => {
-    // В данном проекте главная страница доступна по корню '/'
-    router.push('/');
-  };
+    router.push('/login')
+  }
 
   return (
     <div className={styles.page}>
@@ -29,7 +28,7 @@ export default function NotFoundPage() {
           </p>
           <div className={styles.actions}>
             <Button appearance='ghost' rounded='md' animation='double-swipe' variant="primary" size="lg" onClick={handleGoHome}>
-              Вернуться на главную
+              Перейти ко входу
             </Button>
           </div>
         </div>

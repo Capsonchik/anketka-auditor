@@ -45,12 +45,7 @@ export default function TwoFactorPage() {
   const handleConfirm = () => {
     const enteredCode = code.join('');
     if (enteredCode === '123456') {
-      const role = searchParams.get('role');
-      if (role === 'auditor') {
-        router.push('/auditor');
-      } else {
-        router.push('/');
-      }
+      router.push('/auditor');
     } else {
       setError(true);
     }

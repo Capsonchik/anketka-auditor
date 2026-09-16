@@ -45,7 +45,11 @@ export const Header = ({ auditor }:AuditorHeaderProps) => {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.logo}>
-          <Link href="/" className={styles.brand} aria-label="Анкетка — на главную">
+          <Link
+            href={auditor ? '/auditor' : '/login'}
+            className={styles.brand}
+            aria-label={auditor ? 'Анкетка — в кабинет' : 'Анкетка — на вход'}
+          >
             <span className={styles.brandMark} aria-hidden="true" />
             <span className={styles.brandText}>
               <span className={styles.brandTitle}>ANKETKA</span>
