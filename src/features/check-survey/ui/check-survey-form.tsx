@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Assignment } from '@/entities/assignment/model/types'
 import {
+  getConfigBoolean,
   questionAnswerKey,
+  type PublicPaCompletionMeta,
   type PublicPaPage,
   type PublicPaQuestion,
   type PublicPaSession,
@@ -12,28 +14,36 @@ import {
   useSubmitPublicPaMutation,
 } from '@/entities/public-pa'
 import { Button } from '@/shared/ui/button'
-import { FormField } from '@/shared/ui/form-field'
-import { Input, Textarea } from '@/shared/ui/input'
-import { SelectPicker } from '@/shared/ui/picker'
-import { PillSwitchFlexible } from '@/shared/ui/pill-switch-flexible'
 import { ProgressBar } from '@/shared/ui/progress-bar'
 import { Loader } from '@/shared/ui'
 
+import {
+  buildDraftPayload,
+  collectPageCodes,
+  extractAnswersFromDraft,
+  extractCompletedValuesFromDraft,
+  extractCompletionFromDraft,
+  extractPageIdxFromDraft,
+  extractSubmittedCountFromDraft,
+  isAuditorIdentityCode,
+  splitScreeningProductAnswers,
+  type AnswersMap,
+} from '../lib/answer-model'
+import { buildCompletedOptionKey } from '../lib/cascade-completion'
+import { getDependsOnCodesFromConfig } from '../lib/build-pa-options-params'
+import { buildDependentCodesByDriver, findRepeatPageIndex, findScreeningPageIndex } from '../lib/page-roles'
+import { isAnswerFilled, isQuestionVisibleByLogic, shouldTerminateByLogic } from '../lib/survey-logic'
+import { usePaOptions } from '../hooks/use-pa-options'
+import { QuestionField } from './question-field'
 import { VisitMeta } from './visit-meta'
 import styles from './check-survey-form.module.scss'
-
-type AnswersMap = Record<string, string>
 
 type CheckSurveyFormProps = {
   assignment: Assignment
   session: PublicPaSession
-  initialAnswers?: AnswersMap
+  initialDraft?: Record<string, unknown> | null
   isBootstrapping?: boolean
   onSubmitted?: () => void | Promise<void>
-}
-
-function isFilled(value: string | undefined): boolean {
-  return Boolean(value && String(value).trim())
 }
 
 function isAssignmentLocked(assignment: Assignment): boolean {
@@ -47,171 +57,55 @@ function isAssignmentLocked(assignment: Assignment): boolean {
   )
 }
 
-function listQuestions(pages: PublicPaPage[]): PublicPaQuestion[] {
-  return pages.flatMap((page) =>
-    [...(page.questions || [])].sort((a, b) => a.sortOrder - b.sortOrder),
-  )
-}
-
-function listMissingRequired(pages: PublicPaPage[], answers: AnswersMap): PublicPaQuestion[] {
-  return listQuestions(pages).filter(
-    (q) => q.required && !isFilled(answers[questionAnswerKey(q)]),
-  )
-}
-
-function listUnfilled(pages: PublicPaPage[], answers: AnswersMap): PublicPaQuestion[] {
-  return listQuestions(pages).filter((q) => !isFilled(answers[questionAnswerKey(q)]))
-}
-
-/** Прогресс по всем видимым вопросам — иначе необязательные поля дают ложные 100%. */
-function calcProgress(pages: PublicPaPage[], answers: AnswersMap): number {
-  const all = listQuestions(pages)
-  if (all.length === 0) return 100
-  const filled = all.length - listUnfilled(pages, answers).length
-  return Math.round((filled / all.length) * 100)
-}
-
-function QuestionField({
-  question,
-  value,
-  onChange,
-  readOnly,
-}: {
-  question: PublicPaQuestion
-  value: string
-  onChange: (next: string) => void
-  readOnly?: boolean
-}) {
-  const type = String(question.type || '').toLowerCase()
-  const options = (question.options || []).map((o) => ({
-    value: o.value,
-    label: o.label,
-  }))
-  const isChoice =
-    options.length > 0 &&
-    (type.includes('single') ||
-      type === 'radio' ||
-      type === 'select' ||
-      type.includes('choice') ||
-      options.length <= 6)
-
-  if (isChoice) {
-    if (options.length <= 6) {
-      return (
-        <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-          <PillSwitchFlexible
-            name={questionAnswerKey(question)}
-            size="small"
-            data={options}
-            value={value || ''}
-            onChange={(next) => {
-              if (readOnly) return
-              onChange(String(next))
-            }}
-          />
-        </FormField>
-      )
-    }
-    return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-        <SelectPicker
-          block
-          cleanable={!readOnly}
-          placeholder="Выберите"
-          items={options}
-          value={value || null}
-          onChange={(next) => {
-            if (readOnly) return
-            onChange(next == null ? '' : String(next))
-          }}
-        />
-      </FormField>
-    )
-  }
-
-  if (type.includes('area') || type === 'textarea' || type === 'long_text') {
-    return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-        <Textarea
-          block
-          rows={3}
-          value={value}
-          disabled={readOnly}
-          readOnly={readOnly}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={question.description || undefined}
-        />
-      </FormField>
-    )
-  }
-
-  if (type.includes('number') || type === 'integer' || type === 'decimal') {
-    return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-        <Input
-          block
-          type="number"
-          value={value}
-          disabled={readOnly}
-          readOnly={readOnly}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </FormField>
-    )
-  }
-
-  return (
-    <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-      <Input
-        block
-        value={value}
-        disabled={readOnly}
-        readOnly={readOnly}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </FormField>
-  )
-}
-
-function flattenAnswersTree(nested: Record<string, unknown>): AnswersMap {
-  const out: AnswersMap = {}
-  const take = (source: Record<string, unknown>) => {
-    for (const [k, v] of Object.entries(source)) {
-      if (k === 'screening' || k === 'product') continue
-      if (v == null || typeof v === 'object') continue
-      if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
-        out[k] = String(v)
-      }
+function clearDependentAnswers(
+  answers: AnswersMap,
+  driverCode: string,
+  dependentCodesByDriver: Map<string, Set<string>>,
+): AnswersMap {
+  const next = { ...answers }
+  const visited = new Set<string>()
+  const queue = [driverCode]
+  while (queue.length) {
+    const parentCode = queue.shift()
+    if (!parentCode) continue
+    const dependents = dependentCodesByDriver.get(parentCode)
+    if (!dependents) continue
+    for (const dependentCode of dependents) {
+      if (visited.has(dependentCode)) continue
+      visited.add(dependentCode)
+      delete next[dependentCode]
+      queue.push(dependentCode)
     }
   }
+  return next
+}
 
-  take(nested)
-  const screening =
-    nested.screening && typeof nested.screening === 'object' && !Array.isArray(nested.screening)
-      ? (nested.screening as Record<string, unknown>)
-      : null
-  const product =
-    nested.product && typeof nested.product === 'object' && !Array.isArray(nested.product)
-      ? (nested.product as Record<string, unknown>)
-      : null
-  if (screening) take(screening)
-  if (product) take(product)
+function collectDependentCodes(
+  driverCode: string,
+  dependentCodesByDriver: Map<string, Set<string>>,
+): string[] {
+  const out: string[] = []
+  const visited = new Set<string>()
+  const queue = [driverCode]
+  while (queue.length) {
+    const parentCode = queue.shift()
+    if (!parentCode) continue
+    const dependents = dependentCodesByDriver.get(parentCode)
+    if (!dependents) continue
+    for (const dependentCode of dependents) {
+      if (visited.has(dependentCode)) continue
+      visited.add(dependentCode)
+      out.push(dependentCode)
+      queue.push(dependentCode)
+    }
+  }
   return out
-}
-
-function extractAnswersFromDraft(draft: Record<string, unknown> | null | undefined): AnswersMap {
-  if (!draft || typeof draft !== 'object') return {}
-  const nested = draft.answers
-  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
-    return flattenAnswersTree(nested as Record<string, unknown>)
-  }
-  return {}
 }
 
 export function CheckSurveyForm({
   assignment,
   session,
-  initialAnswers = {},
+  initialDraft = null,
   isBootstrapping = false,
   onSubmitted,
 }: CheckSurveyFormProps) {
@@ -220,34 +114,151 @@ export function CheckSurveyForm({
     [session.builder?.pages],
   )
 
+  const [pageIdx, setPageIdx] = useState(0)
   const [answers, setAnswers] = useState<AnswersMap>({})
-  const [notice, setNotice] = useState<string | null>(null)
+  const [completedValuesByCode, setCompletedValuesByCode] = useState<Record<string, string[]>>({})
+  const [completionMeta, setCompletionMeta] = useState<PublicPaCompletionMeta | null>(null)
+  const [submittedCount, setSubmittedCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [submittedLocally, setSubmittedLocally] = useState(false)
   const dirtyRef = useRef(false)
+  const draftHydratedRef = useRef(false)
 
   const [saveDraft, saveState] = useSavePublicPaDraftMutation()
   const [submitPa, submitState] = useSubmitPublicPaMutation()
 
   const locked = submittedLocally || isAssignmentLocked(assignment)
-
-  // Черновик / отправленные ответы: не затираем локальный ввод, кроме режима просмотра.
-  useEffect(() => {
-    if (Object.keys(initialAnswers).length === 0) return
-    if (dirtyRef.current && !locked) return
-    setAnswers((prev) => (locked ? { ...initialAnswers } : { ...initialAnswers, ...prev }))
-  }, [initialAnswers, locked])
-
-  const missingRequired = useMemo(() => listMissingRequired(pages, answers), [pages, answers])
-  const unfilled = useMemo(() => listUnfilled(pages, answers), [pages, answers])
-  const progress = useMemo(() => calcProgress(pages, answers), [pages, answers])
-  const busy = saveState.isLoading || submitState.isLoading || isBootstrapping
   const context = { checkId: assignment.checkId }
 
-  const setAnswer = (key: string, value: string) => {
-    if (!key || locked) return
+  const screeningPageIdx = useMemo(() => findScreeningPageIndex(pages), [pages])
+  const repeatPageIdx = useMemo(() => findRepeatPageIndex(pages), [pages])
+  const isRepeatPage = repeatPageIdx !== null && pageIdx === repeatPageIdx
+
+  const screeningCodes = useMemo(
+    () => collectPageCodes(pages[screeningPageIdx]),
+    [pages, screeningPageIdx],
+  )
+  const repeatCodes = useMemo(
+    () => (repeatPageIdx == null ? [] : collectPageCodes(pages[repeatPageIdx])),
+    [pages, repeatPageIdx],
+  )
+
+  const dependentCodesByDriver = useMemo(
+    () =>
+      buildDependentCodesByDriver(
+        pages,
+        (q) => questionAnswerKey(q as PublicPaQuestion),
+        getDependsOnCodesFromConfig,
+      ),
+    [pages],
+  )
+
+  useEffect(() => {
+    if (draftHydratedRef.current) return
+    if (!initialDraft) return
+    draftHydratedRef.current = true
+    setAnswers(extractAnswersFromDraft(initialDraft))
+    setCompletedValuesByCode(extractCompletedValuesFromDraft(initialDraft))
+    setCompletionMeta(extractCompletionFromDraft(initialDraft))
+    setPageIdx(extractPageIdxFromDraft(initialDraft))
+    setSubmittedCount(extractSubmittedCountFromDraft(initialDraft))
+  }, [initialDraft])
+
+  // If draft arrives after first empty render
+  useEffect(() => {
+    if (dirtyRef.current || locked) return
+    if (!initialDraft) return
+    if (Object.keys(answers).length > 0) return
+    const extracted = extractAnswersFromDraft(initialDraft)
+    if (Object.keys(extracted).length === 0) return
+    setAnswers(extracted)
+    setCompletedValuesByCode(extractCompletedValuesFromDraft(initialDraft))
+    setCompletionMeta(extractCompletionFromDraft(initialDraft))
+  }, [answers, initialDraft, locked])
+
+  useEffect(() => {
+    if (!locked || !initialDraft) return
+    setAnswers(extractAnswersFromDraft(initialDraft))
+    setCompletedValuesByCode(extractCompletedValuesFromDraft(initialDraft))
+    setCompletionMeta(extractCompletionFromDraft(initialDraft))
+  }, [initialDraft, locked])
+
+  const page: PublicPaPage | null = pages[pageIdx] ?? null
+  const visiblePageQuestions = useMemo(() => {
+    if (!page) return []
+    return [...page.questions]
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .filter((q) => isQuestionVisibleByLogic(q, answers))
+      .filter((q) => {
+        const code = questionAnswerKey(q)
+        return !(code && isAuditorIdentityCode(code))
+      })
+  }, [answers, page])
+
+  const { optionsByCode, clearOptionsForCodes } = usePaOptions({
+    token: session.token,
+    questions: visiblePageQuestions,
+    answers,
+    enabled: !locked,
+  })
+
+  const hasTerminateConditionMatch = useMemo(() => {
+    for (const surveyPage of pages) {
+      for (const question of surveyPage.questions || []) {
+        if (!isQuestionVisibleByLogic(question, answers)) continue
+        if (shouldTerminateByLogic(question, answers)) return true
+      }
+    }
+    return false
+  }, [answers, pages])
+
+  const missingRequiredForPage = useMemo(() => {
+    return visiblePageQuestions.filter((q) => {
+      if (!q.required) return false
+      return !isAnswerFilled(answers[questionAnswerKey(q)])
+    })
+  }, [answers, visiblePageQuestions])
+
+  const missingRequiredForRepeat = useMemo(() => {
+    if (repeatPageIdx == null) return []
+    const repeatPage = pages[repeatPageIdx]
+    if (!repeatPage) return []
+    return [...repeatPage.questions]
+      .filter((q) => isQuestionVisibleByLogic(q, answers))
+      .filter((q) => q.required && !isAnswerFilled(answers[questionAnswerKey(q)]))
+  }, [answers, pages, repeatPageIdx])
+
+  const filledCount = useMemo(() => {
+    const all = pages.flatMap((p) => p.questions || [])
+    if (!all.length) return 0
+    const filled = all.filter((q) => isAnswerFilled(answers[questionAnswerKey(q)])).length
+    return Math.round((filled / all.length) * 100)
+  }, [answers, pages])
+
+  let localCompletedCount = 0
+  for (const values of Object.values(completedValuesByCode)) {
+    const count = Array.isArray(values) ? values.length : 0
+    if (count > localCompletedCount) localCompletedCount = count
+  }
+  const completedCount = Math.max(
+    completionMeta?.itemsCompleted ?? 0,
+    localCompletedCount,
+    submittedCount,
+  )
+  const totalCount = completionMeta?.itemsTotal ?? null
+  const progressCounterLabel =
+    totalCount && totalCount > 0
+      ? `Осталось ${Math.max(totalCount - completedCount, 0)} · Отправлено ${Math.min(completedCount, totalCount)}`
+      : null
+
+  const busy = saveState.isLoading || submitState.isLoading || isBootstrapping
+
+  const setAnswer = (code: string, value: unknown) => {
+    if (!code || locked) return
     dirtyRef.current = true
-    setAnswers((prev) => ({ ...prev, [key]: value }))
+    setAnswers((prev) => clearDependentAnswers({ ...prev, [code]: value }, code, dependentCodesByDriver))
+    clearOptionsForCodes(collectDependentCodes(code, dependentCodesByDriver))
     setNotice(null)
     setError(null)
   }
@@ -259,7 +270,12 @@ export function CheckSurveyForm({
       await saveDraft({
         token: session.token,
         body: {
-          draft: { answers },
+          draft: buildDraftPayload({
+            pageIdx,
+            answers,
+            submittedCount,
+            completedValuesByCode,
+          }),
           context,
         },
       }).unwrap()
@@ -273,30 +289,94 @@ export function CheckSurveyForm({
     }
   }
 
-  const handleSubmit = async () => {
+  const appendCompletedFromRepeat = () => {
+    setCompletedValuesByCode((prev) => {
+      const next: Record<string, string[]> = { ...prev }
+      const repeatPage = repeatPageIdx == null ? null : pages[repeatPageIdx]
+      for (const code of repeatCodes) {
+        const question = repeatPage?.questions.find((item) => questionAnswerKey(item) === code)
+        if (!question || !getConfigBoolean(question.config, 'skipCompletedInLoop')) continue
+        if (dependentCodesByDriver.get(code)?.size) continue
+        const answerValue = answers[code]
+        const current = new Set((next[code] ?? []).map(String))
+        if (typeof answerValue === 'string' || typeof answerValue === 'number') {
+          const key = buildCompletedOptionKey(question.config, answers, String(answerValue))
+          if (key) current.add(key)
+        }
+        if (Array.isArray(answerValue)) {
+          for (const item of answerValue) {
+            const key = buildCompletedOptionKey(question.config, answers, String(item))
+            if (key) current.add(key)
+          }
+        }
+        next[code] = Array.from(current)
+      }
+      return next
+    })
+  }
+
+  const handleSubmit = async (mode: 'continue' | 'finish' = 'finish') => {
     if (locked) return
     setError(null)
-    if (missingRequired.length > 0) {
-      const titles = missingRequired
-        .map((q) => q.title?.trim() || questionAnswerKey(q))
-        .filter(Boolean)
-      const preview = titles.slice(0, 8).join(', ')
-      const more = titles.length > 8 ? ` и ещё ${titles.length - 8}` : ''
-      setError(`Не заполнены обязательные поля (${titles.length}): ${preview}${more}`)
-      return
-    }
+
     try {
+      if (isRepeatPage) {
+        if (missingRequiredForRepeat.length) {
+          setError(
+            `Заполните обязательные поля: ${missingRequiredForRepeat.map((x) => x.title).join(', ')}`,
+          )
+          return
+        }
+        const { screening, product } = splitScreeningProductAnswers({
+          answers,
+          screeningCodes,
+          repeatCodes,
+        })
+        await submitPa({
+          token: session.token,
+          body: {
+            mode,
+            answers: { screening, product },
+            context,
+          },
+        }).unwrap()
+
+        if (mode === 'continue') {
+          appendCompletedFromRepeat()
+          setSubmittedCount((x) => x + 1)
+          setAnswers((prev) => {
+            const next = { ...prev }
+            for (const code of repeatCodes) delete next[code]
+            return next
+          })
+          clearOptionsForCodes(repeatCodes)
+          setNotice('Ответ отправлен. Можно заполнить следующий товар.')
+          return
+        }
+
+        setSubmittedLocally(true)
+        setNotice(null)
+        await onSubmitted?.()
+        return
+      }
+
+      if (missingRequiredForPage.length) {
+        setError(
+          `Заполните обязательные поля: ${missingRequiredForPage.map((x) => x.title).join(', ')}`,
+        )
+        return
+      }
+
       await submitPa({
         token: session.token,
         body: {
-          answers,
           mode: 'finish',
+          answers,
           context,
         },
       }).unwrap()
       setSubmittedLocally(true)
       setNotice(null)
-      setError(null)
       await onSubmitted?.()
     } catch (err) {
       const detail =
@@ -316,53 +396,68 @@ export function CheckSurveyForm({
     )
   }
 
+  const canPrev = pageIdx > 0
+  const canNext = pageIdx < pages.length - 1
+  const canGoNext = canNext && missingRequiredForPage.length === 0 && !hasTerminateConditionMatch
+
   return (
     <div className={styles.root}>
       <VisitMeta assignment={assignment} />
 
       <ProgressBar
         className={styles.progress}
-        value={progress}
+        value={filledCount}
         label={
           locked
             ? 'Прогресс заполнения'
-            : `Прогресс заполнения${unfilled.length ? ` · осталось ${unfilled.length}` : ''}`
+            : `Прогресс заполнения${progressCounterLabel ? ` · ${progressCounterLabel}` : ''}`
         }
       />
 
       {pages.length === 0 ? (
         <p className={styles.empty}>В анкете пока нет вопросов</p>
-      ) : (
-        pages.map((page) => (
-          <section key={page.id} className={styles.section}>
-            <h2 className={styles.sectionTitle}>{page.title || 'Раздел'}</h2>
-            <div className={page.sectionType === 'loop' ? styles.card : styles.fields}>
-              {[...page.questions]
-                .sort((a, b) => a.sortOrder - b.sortOrder)
-                .map((question) => {
-                  const key = questionAnswerKey(question)
-                  const missing = !locked && question.required && !isFilled(answers[key])
-                  return (
-                    <div
-                      key={question.id}
-                      className={missing ? `${styles.field} ${styles.fieldMissing}` : styles.field}
-                    >
-                      <QuestionField
-                        question={question}
-                        value={answers[key] || ''}
-                        readOnly={locked}
-                        onChange={(next) => setAnswer(key, next)}
-                      />
-                    </div>
-                  )
-                })}
-            </div>
-          </section>
-        ))
-      )}
+      ) : page ? (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            {page.title || 'Раздел'}
+            {pages.length > 1 ? (
+              <span className={styles.pageCounter}>
+                {' '}
+                ({pageIdx + 1}/{pages.length})
+              </span>
+            ) : null}
+          </h2>
+          <div className={page.sectionType === 'loop' ? styles.card : styles.fields}>
+            {visiblePageQuestions.map((question) => {
+              const key = questionAnswerKey(question)
+              const missing = !locked && question.required && !isAnswerFilled(answers[key])
+              return (
+                <div
+                  key={question.id}
+                  className={missing ? `${styles.field} ${styles.fieldMissing}` : styles.field}
+                >
+                  <QuestionField
+                    question={question}
+                    value={answers[key]}
+                    answers={answers}
+                    completedValuesByCode={completedValuesByCode}
+                    dynamicOptions={optionsByCode[key]}
+                    allowCompletedFallback={Boolean(completionMeta?.allCompleted)}
+                    readOnly={locked}
+                    onChange={(next) => setAnswer(key, next)}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {error ? <div className={styles.bannerError}>{error}</div> : null}
       {notice && !error && !locked ? <div className={styles.notice}>{notice}</div> : null}
+      {hasTerminateConditionMatch && !locked ? (
+        <div className={styles.bannerError}>Сработали условия завершения анкеты.</div>
+      ) : null}
 
       {locked ? (
         <div className={styles.submittedBox}>
@@ -374,18 +469,65 @@ export function CheckSurveyForm({
         </div>
       ) : (
         <div className={styles.actions}>
+          {canPrev ? (
+            <Button
+              type="button"
+              variant="default"
+              appearance="ghost"
+              disabled={busy}
+              onClick={() => setPageIdx((idx) => Math.max(0, idx - 1))}
+            >
+              Назад
+            </Button>
+          ) : null}
+
           <Button type="button" variant="default" appearance="ghost" disabled={busy} onClick={handleSaveDraft}>
             Сохранить черновик
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            disabled={busy}
-            loading={submitState.isLoading}
-            onClick={handleSubmit}
-          >
-            Отправить
-          </Button>
+
+          {canGoNext ? (
+            <Button
+              type="button"
+              variant="default"
+              disabled={busy}
+              onClick={() => setPageIdx((idx) => Math.min(pages.length - 1, idx + 1))}
+            >
+              Далее
+            </Button>
+          ) : null}
+
+          {isRepeatPage ? (
+            <>
+              <Button
+                type="button"
+                variant="default"
+                disabled={busy}
+                loading={submitState.isLoading}
+                onClick={() => void handleSubmit('continue')}
+              >
+                Отправить и продолжить
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                disabled={busy}
+                loading={submitState.isLoading}
+                onClick={() => void handleSubmit('finish')}
+              >
+                Отправить и завершить
+              </Button>
+            </>
+          ) : !canNext ? (
+            <Button
+              type="button"
+              variant="primary"
+              disabled={busy || hasTerminateConditionMatch}
+              loading={submitState.isLoading}
+              onClick={() => void handleSubmit('finish')}
+            >
+              Отправить
+            </Button>
+          ) : null}
         </div>
       )}
     </div>

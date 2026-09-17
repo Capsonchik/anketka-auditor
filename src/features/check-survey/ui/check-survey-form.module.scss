@@ -22,6 +22,12 @@
   border-bottom: 1px solid $border-color;
 }
 
+.pageCounter {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+}
+
 .fields,
 .card {
   display: flex;

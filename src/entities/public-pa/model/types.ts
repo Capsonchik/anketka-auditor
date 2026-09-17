@@ -3,6 +3,9 @@ export type PublicPaOption = {
   label: string
   value: string
   sortOrder: number
+  points?: number
+  isExclusive?: boolean
+  isNA?: boolean
 }
 
 export type PublicPaQuestion = {
@@ -15,7 +18,11 @@ export type PublicPaQuestion = {
   required: boolean
   sortOrder: number
   config: Record<string, unknown> | null
+  logic?: Record<string, unknown> | null
+  display?: Record<string, unknown> | null
   options: PublicPaOption[]
+  allowNa?: boolean
+  allowComment?: boolean
 }
 
 export type PublicPaPage = {
@@ -23,6 +30,7 @@ export type PublicPaPage = {
   title: string
   sortOrder: number
   sectionType: 'regular' | 'loop'
+  loopConfig?: Record<string, unknown> | null
   questions: PublicPaQuestion[]
 }
 
@@ -45,8 +53,23 @@ export type PublicPaSession = {
   builder: PublicPaBuilder
 }
 
+export type PublicPaCompletionMeta = {
+  itemsCompleted: number
+  itemsTotal: number | null
+  allCompleted: boolean
+}
+
+export type PublicPaDraftPayload = {
+  pageIdx?: number
+  answers?: Record<string, unknown>
+  submittedCount?: number
+  completedValuesByCode?: Record<string, string[]>
+  savedAt?: string
+  completion?: Partial<PublicPaCompletionMeta> | null
+}
+
 export type PublicPaDraftResponse = {
-  draft: Record<string, unknown> | null
+  draft: (PublicPaDraftPayload & Record<string, unknown>) | null
 }
 
 export type PublicPaDraftSaveResponse = {
@@ -66,6 +89,15 @@ export type PublicPaSubmitBody = {
   context?: { checkId: string } | null
 }
 
+export type PublicPaOptionsItem = {
+  value: string
+  label: string
+}
+
+export type PublicPaOptionsResponse = {
+  items: PublicPaOptionsItem[]
+}
+
 export function questionAnswerKey(question: PublicPaQuestion): string {
   const code = String(question.code ?? '').trim()
   if (code) return code
@@ -76,4 +108,21 @@ export function questionAnswerKey(question: PublicPaQuestion): string {
   ).trim()
   if (configCode) return configCode
   return String(question.id ?? '').trim()
+}
+
+export function getConfigString(
+  cfg: Record<string, unknown> | null | undefined,
+  key: string,
+): string | null {
+  if (!cfg) return null
+  const v = cfg[key]
+  return typeof v === 'string' && v.trim() ? v.trim() : null
+}
+
+export function getConfigBoolean(
+  cfg: Record<string, unknown> | null | undefined,
+  key: string,
+): boolean {
+  if (!cfg) return false
+  return Boolean(cfg[key])
 }
