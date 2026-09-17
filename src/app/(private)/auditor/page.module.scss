@@ -85,6 +85,10 @@
     }
   }
 
+  .calendarSlot {
+    margin-bottom: $spacing-6;
+  }
+
   .card {
     background: linear-gradient(135deg, $bg-primary 0%, $bg-secondary 100%);
     border: 1px solid $border-color;

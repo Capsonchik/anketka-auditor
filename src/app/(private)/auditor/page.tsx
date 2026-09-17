@@ -1,6 +1,7 @@
 import React from 'react'
 import { getAuditorFromHeaders } from '@/entities/auditor/lib/get-auditor-from-headers'
 import { getAuditorRatingStatsFromHeaders } from '@/entities/stats/lib/get-auditor-rating-stats-from-headers'
+import { TaskCalendar } from '@/features/task-calendar'
 import styles from './page.module.scss'
 
 const MOCK_TASKS = [
@@ -51,6 +52,10 @@ export default async function AuditorPage() {
             <div className={styles.description}>{item.description}</div>
           </div>
         ))}
+      </div>
+
+      <div className={styles.calendarSlot}>
+        <TaskCalendar />
       </div>
 
       <div className={`${styles.card} ${styles.taskList}`}>
