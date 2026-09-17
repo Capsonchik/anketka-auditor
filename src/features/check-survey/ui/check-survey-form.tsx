@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Assignment } from '@/entities/assignment/model/types'
 import {
-  getConfigBoolean,
   questionAnswerKey,
   type PublicPaCompletionMeta,
   type PublicPaPage,
@@ -29,10 +28,14 @@ import {
   splitScreeningProductAnswers,
   type AnswersMap,
 } from '../lib/answer-model'
-import { buildCompletedOptionKey } from '../lib/cascade-completion'
+import {
+  buildCompletedOptionKey,
+  shouldHideCompletedInLoop,
+  shouldTrackCompletedInLoop,
+} from '../lib/cascade-completion'
 import { getDependsOnCodesFromConfig } from '../lib/build-pa-options-params'
 import { buildDependentCodesByDriver, findRepeatPageIndex, findScreeningPageIndex } from '../lib/page-roles'
-import { isAnswerFilled, isQuestionVisibleByLogic, shouldTerminateByLogic } from '../lib/survey-logic'
+import { isQuestionAnswerFilled, isQuestionVisibleByLogic, shouldTerminateByLogic } from '../lib/survey-logic'
 import { usePaOptions } from '../hooks/use-pa-options'
 import { QuestionField } from './question-field'
 import { VisitMeta } from './visit-meta'
@@ -196,9 +199,21 @@ export function CheckSurveyForm({
       })
   }, [answers, page])
 
+  const allQuestionCodes = useMemo(() => {
+    const set = new Set<string>()
+    for (const surveyPage of pages) {
+      for (const q of surveyPage.questions || []) {
+        const code = questionAnswerKey(q)
+        if (code) set.add(code)
+      }
+    }
+    return set
+  }, [pages])
+
   const { optionsByCode, clearOptionsForCodes } = usePaOptions({
     token: session.token,
     questions: visiblePageQuestions,
+    allQuestionCodes,
     answers,
     enabled: !locked,
   })
@@ -216,7 +231,7 @@ export function CheckSurveyForm({
   const missingRequiredForPage = useMemo(() => {
     return visiblePageQuestions.filter((q) => {
       if (!q.required) return false
-      return !isAnswerFilled(answers[questionAnswerKey(q)])
+      return !isQuestionAnswerFilled(q, answers[questionAnswerKey(q)])
     })
   }, [answers, visiblePageQuestions])
 
@@ -226,13 +241,13 @@ export function CheckSurveyForm({
     if (!repeatPage) return []
     return [...repeatPage.questions]
       .filter((q) => isQuestionVisibleByLogic(q, answers))
-      .filter((q) => q.required && !isAnswerFilled(answers[questionAnswerKey(q)]))
+      .filter((q) => q.required && !isQuestionAnswerFilled(q, answers[questionAnswerKey(q)]))
   }, [answers, pages, repeatPageIdx])
 
   const filledCount = useMemo(() => {
     const all = pages.flatMap((p) => p.questions || [])
     if (!all.length) return 0
-    const filled = all.filter((q) => isAnswerFilled(answers[questionAnswerKey(q)])).length
+    const filled = all.filter((q) => isQuestionAnswerFilled(q, answers[questionAnswerKey(q)])).length
     return Math.round((filled / all.length) * 100)
   }, [answers, pages])
 
@@ -289,30 +304,46 @@ export function CheckSurveyForm({
     }
   }
 
-  const appendCompletedFromRepeat = () => {
-    setCompletedValuesByCode((prev) => {
-      const next: Record<string, string[]> = { ...prev }
-      const repeatPage = repeatPageIdx == null ? null : pages[repeatPageIdx]
-      for (const code of repeatCodes) {
-        const question = repeatPage?.questions.find((item) => questionAnswerKey(item) === code)
-        if (!question || !getConfigBoolean(question.config, 'skipCompletedInLoop')) continue
-        if (dependentCodesByDriver.get(code)?.size) continue
-        const answerValue = answers[code]
-        const current = new Set((next[code] ?? []).map(String))
-        if (typeof answerValue === 'string' || typeof answerValue === 'number') {
-          const key = buildCompletedOptionKey(question.config, answers, String(answerValue))
+  const appendCompletedFromRepeat = (): Record<string, string[]> => {
+    const repeatPage = repeatPageIdx == null ? null : pages[repeatPageIdx]
+    const next: Record<string, string[]> = { ...completedValuesByCode }
+    for (const code of repeatCodes) {
+      const question = repeatPage?.questions.find((item) => questionAnswerKey(item) === code)
+      if (!question || !shouldTrackCompletedInLoop(question.config)) continue
+      const isDriver = Boolean(dependentCodesByDriver.get(code)?.size)
+      if (isDriver && !shouldHideCompletedInLoop(question.config, isDriver)) continue
+      const answerValue = answers[code]
+      const current = new Set((next[code] ?? []).map(String))
+      if (typeof answerValue === 'string' || typeof answerValue === 'number') {
+        const key = buildCompletedOptionKey(question.config, answers, String(answerValue))
+        if (key) current.add(key)
+      }
+      if (Array.isArray(answerValue)) {
+        for (const item of answerValue) {
+          const key = buildCompletedOptionKey(question.config, answers, String(item))
           if (key) current.add(key)
         }
-        if (Array.isArray(answerValue)) {
-          for (const item of answerValue) {
-            const key = buildCompletedOptionKey(question.config, answers, String(item))
-            if (key) current.add(key)
-          }
-        }
-        next[code] = Array.from(current)
       }
-      return next
+      next[code] = Array.from(current)
+    }
+    setCompletedValuesByCode(next)
+    setCompletionMeta((prev) => {
+      if (!prev) {
+        return {
+          itemsCompleted: 1,
+          itemsTotal: null,
+          allCompleted: false,
+        }
+      }
+      const itemsCompleted = prev.itemsCompleted + 1
+      const itemsTotal = prev.itemsTotal
+      return {
+        itemsCompleted,
+        itemsTotal,
+        allCompleted: itemsTotal != null && itemsTotal > 0 && itemsCompleted >= itemsTotal,
+      }
     })
+    return next
   }
 
   const handleSubmit = async (mode: 'continue' | 'finish' = 'finish') => {
@@ -342,14 +373,25 @@ export function CheckSurveyForm({
         }).unwrap()
 
         if (mode === 'continue') {
-          appendCompletedFromRepeat()
-          setSubmittedCount((x) => x + 1)
-          setAnswers((prev) => {
-            const next = { ...prev }
-            for (const code of repeatCodes) delete next[code]
-            return next
-          })
+          const nextCompleted = appendCompletedFromRepeat()
+          const nextSubmittedCount = submittedCount + 1
+          setSubmittedCount(nextSubmittedCount)
+          const clearedAnswers = { ...answers }
+          for (const code of repeatCodes) delete clearedAnswers[code]
+          setAnswers(clearedAnswers)
           clearOptionsForCodes(repeatCodes)
+          void saveDraft({
+            token: session.token,
+            body: {
+              draft: buildDraftPayload({
+                pageIdx,
+                answers: clearedAnswers,
+                submittedCount: nextSubmittedCount,
+                completedValuesByCode: nextCompleted,
+              }),
+              context,
+            },
+          }).catch(() => {})
           setNotice('Ответ отправлен. Можно заполнить следующий товар.')
           return
         }
@@ -430,7 +472,7 @@ export function CheckSurveyForm({
           <div className={page.sectionType === 'loop' ? styles.card : styles.fields}>
             {visiblePageQuestions.map((question) => {
               const key = questionAnswerKey(question)
-              const missing = !locked && question.required && !isAnswerFilled(answers[key])
+              const missing = !locked && question.required && !isQuestionAnswerFilled(question, answers[key])
               return (
                 <div
                   key={question.id}
@@ -443,6 +485,7 @@ export function CheckSurveyForm({
                     completedValuesByCode={completedValuesByCode}
                     dynamicOptions={optionsByCode[key]}
                     allowCompletedFallback={Boolean(completionMeta?.allCompleted)}
+                    isDriverForCascade={Boolean(dependentCodesByDriver.get(key)?.size)}
                     readOnly={locked}
                     onChange={(next) => setAnswer(key, next)}
                   />

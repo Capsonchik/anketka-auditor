@@ -137,3 +137,69 @@ export function shouldTerminateByLogic(
 export function isAnswerFilled(value: unknown): boolean {
   return hasAnswer(value)
 }
+
+/** Как isFilledRequired в /pa — с учётом типа вопроса */
+export function isQuestionAnswerFilled(
+  question: { type?: string | null; config?: Record<string, unknown> | null },
+  value: unknown,
+): boolean {
+  const type = String(question.type || '').toLowerCase()
+  if (type === 'intro') return true
+  if (type === 'matrix') {
+    const cfg = question.config ?? {}
+    const table = (cfg.table as Record<string, unknown> | undefined) ?? {}
+    const rows = Array.isArray(table.rows) ? (table.rows as Array<{ id?: string; label?: string }>) : []
+    const fieldType = typeof table.fieldType === 'string' ? table.fieldType : 'radio'
+    const matrixValue =
+      value && typeof value === 'object' && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : null
+    if (!matrixValue || rows.length === 0) return false
+    for (let i = 0; i < rows.length; i += 1) {
+      const row = rows[i]
+      const rowKey = row.id || row.label || `row_${i + 1}`
+      const rowValue = matrixValue[rowKey]
+      if (fieldType === 'checkbox' || fieldType === 'checkbox_limited') {
+        if (!Array.isArray(rowValue) || rowValue.length === 0) return false
+        continue
+      }
+      if (fieldType === 'text') {
+        if (typeof rowValue !== 'string' || !rowValue.trim()) return false
+        continue
+      }
+      if (fieldType === 'number') {
+        if (typeof rowValue === 'number' && Number.isFinite(rowValue)) continue
+        if (
+          typeof rowValue === 'string' &&
+          rowValue.trim() &&
+          Number.isFinite(Number(rowValue.replace(',', '.')))
+        ) {
+          continue
+        }
+        return false
+      }
+      if (typeof rowValue !== 'string' || !rowValue.trim()) return false
+    }
+    return true
+  }
+  if (type === 'multi_choice' || type === 'multiselect' || type === 'checkbox') {
+    return Array.isArray(value) && value.length > 0
+  }
+  if (type === 'rank') {
+    return Array.isArray(value) && value.length > 0
+  }
+  if (type === 'photo') {
+    return Array.isArray(value) && value.length > 0
+  }
+  if (type === 'nps' || type === 'scale') {
+    return typeof value === 'string' && value.trim().length > 0
+  }
+  if (type === 'boolean') return value === true
+  if (type === 'number' || type === 'money' || type === 'integer' || type === 'decimal') {
+    return typeof value === 'number' && Number.isFinite(value)
+  }
+  if (type === 'datetime' || type === 'date') {
+    return typeof value === 'string' && value.trim().length > 0
+  }
+  return hasAnswer(value)
+}

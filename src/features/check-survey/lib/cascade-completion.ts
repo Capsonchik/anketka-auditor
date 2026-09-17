@@ -80,3 +80,26 @@ export function getVisibleOptionsWithCompletedFallback<T>({
   }
   return { visibleOptions: filtered, hiddenCount, usedFallback: false }
 }
+
+/** Учитывать ответ в completedValues после continue на loop */
+export function shouldTrackCompletedInLoop(config: Record<string, unknown> | null | undefined): boolean {
+  if (!config) return false
+  if (Boolean(config.skipCompletedInLoop)) return true
+  const source = typeof config.source === 'string' ? config.source : ''
+  // checklist cascade без явного флага — тоже «уже учтён»
+  return source.includes('checklist')
+}
+
+/**
+ * Скрывать ли option из списка.
+ * Для checklist скрываем и driver (SKU), для остальных — как /pa: только leaf.
+ */
+export function shouldHideCompletedInLoop(
+  config: Record<string, unknown> | null | undefined,
+  isDriverForCascade: boolean,
+): boolean {
+  if (!shouldTrackCompletedInLoop(config)) return false
+  const source = typeof config?.source === 'string' ? config.source : ''
+  if (source.includes('checklist')) return true
+  return !isDriverForCascade
+}

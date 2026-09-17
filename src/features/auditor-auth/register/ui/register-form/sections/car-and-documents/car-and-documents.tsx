@@ -77,22 +77,6 @@ export const CarAndDocuments: React.FC<CarAndDocumentsProps> = ({ isLoading }) =
             />
           </FormField>
         )}
-        <FormField label="СНИЛС">
-          <Input
-            {...register('snils')}
-            placeholder="000-000-000 00"
-            disabled={isLoading}
-            error={errors.snils?.message}
-          />
-        </FormField>
-        <FormField label="Паспортные данные">
-          <Input
-            {...register('passportData')}
-            placeholder="Серия, номер"
-            disabled={isLoading}
-            error={errors.passportData?.message}
-          />
-        </FormField>
       </div>
     </div>
   );
