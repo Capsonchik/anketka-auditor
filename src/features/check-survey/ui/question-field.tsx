@@ -4,16 +4,23 @@ import { FormField } from '@/shared/ui/form-field'
 import { Input, Textarea } from '@/shared/ui/input'
 import { CheckPicker, SelectPicker } from '@/shared/ui/picker'
 import { PillSwitchFlexible } from '@/shared/ui/pill-switch-flexible'
+import { FileUploader } from '@/shared/ui/file-uploader'
 import type { PublicPaOptionsItem, PublicPaOption, PublicPaQuestion } from '@/entities/public-pa'
-import { getConfigBoolean, getConfigString, questionAnswerKey } from '@/entities/public-pa'
+import { getConfigString, questionAnswerKey } from '@/entities/public-pa'
 
 import {
   getVisibleOptionsWithCompletedFallback,
   isCompletedOptionHidden,
+  shouldHideCompletedInLoop,
 } from '../lib/cascade-completion'
 import type { AnswersMap } from '../lib/answer-model'
+import { RankOrderEditor } from './rank-order-editor'
+import styles from './question-field.module.scss'
 
 type ChoiceUi = 'select' | 'check' | 'radio'
+
+type MatrixRow = { id?: string; label?: string }
+type MatrixColumn = { id?: string; label?: string }
 
 type QuestionFieldProps = {
   question: PublicPaQuestion
@@ -22,6 +29,7 @@ type QuestionFieldProps = {
   completedValuesByCode: Record<string, string[]>
   dynamicOptions?: PublicPaOptionsItem[]
   allowCompletedFallback?: boolean
+  isDriverForCascade?: boolean
   readOnly?: boolean
   onChange: (next: unknown) => void
 }
@@ -69,6 +77,178 @@ function applyExclusiveMultiChange(
   return nextValues.filter((item) => !exclusiveValues.has(item) || item === added)
 }
 
+function toIsoDate(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function toIsoDateTimeLocal(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${y}-${m}-${day}T${hh}:${mm}`
+}
+
+function MatrixField({
+  question,
+  value,
+  readOnly,
+  onChange,
+}: {
+  question: PublicPaQuestion
+  value: unknown
+  readOnly: boolean
+  onChange: (next: unknown) => void
+}) {
+  const cfg = question.config ?? {}
+  const table = (cfg.table as Record<string, unknown> | undefined) ?? {}
+  const rows = (Array.isArray(table.rows) ? table.rows : []) as MatrixRow[]
+  const columns = (Array.isArray(table.columns) ? table.columns : []) as MatrixColumn[]
+  const fieldType = typeof table.fieldType === 'string' ? table.fieldType : 'radio'
+  const maxPerRow = typeof table.maxPerRow === 'number' ? table.maxPerRow : 1
+  const matrixValue =
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {}
+
+  // Кабинет: radio/select → SelectPicker по строке (удобнее на мобиле); иначе таблица как /pa
+  const useRowSelect = fieldType === 'radio' || fieldType === 'select' || !fieldType
+
+  if (useRowSelect && columns.length > 0) {
+    const columnOptions = columns.map((column, colIdx) => {
+      const colKey = String(column.id || column.label || `col_${colIdx + 1}`)
+      return { value: colKey, label: String(column.label ?? `Колонка ${colIdx + 1}`) }
+    })
+    return (
+      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+        <div className={styles.matrixStack}>
+          {rows.map((row, rowIdx) => {
+            const rowKey = String(row.id || row.label || `row_${rowIdx + 1}`)
+            const rowLabel = String(row.label ?? `Строка ${rowIdx + 1}`)
+            const rowValue = matrixValue[rowKey]
+            const stringRow =
+              typeof rowValue === 'string' || typeof rowValue === 'number' ? String(rowValue) : ''
+            return (
+              <div key={rowKey} className={styles.matrixRow}>
+                <div className={styles.matrixRowLabel}>{rowLabel}</div>
+                <SelectPicker
+                  block
+                  cleanable={!readOnly}
+                  disabled={readOnly}
+                  searchable={columnOptions.length > 8}
+                  placeholder="Выберите…"
+                  data={columnOptions}
+                  value={stringRow || null}
+                  onChange={(next) => {
+                    if (readOnly) return
+                    onChange({ ...matrixValue, [rowKey]: next == null ? null : String(next) })
+                  }}
+                />
+              </div>
+            )
+          })}
+        </div>
+      </FormField>
+    )
+  }
+
+  return (
+    <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <div className={styles.matrixScroll}>
+        <table className={styles.matrixTable}>
+          <thead>
+            <tr>
+              <th />
+              {columns.map((column, colIdx) => (
+                <th key={`col-${colIdx}`}>{column.label ?? `Колонка ${colIdx + 1}`}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIdx) => {
+              const rowKey = String(row.id || row.label || `row_${rowIdx + 1}`)
+              const rowValue = matrixValue[rowKey]
+              return (
+                <tr key={rowKey}>
+                  <td>{row.label ?? `Строка ${rowIdx + 1}`}</td>
+                  {columns.map((column, colIdx) => {
+                    const colKey = String(column.id || column.label || `col_${colIdx + 1}`)
+                    if (fieldType === 'checkbox' || fieldType === 'checkbox_limited') {
+                      const values = asStringList(rowValue)
+                      const checked = values.includes(colKey)
+                      return (
+                        <td key={`${rowKey}-${colKey}`} className={styles.matrixCell}>
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={readOnly}
+                            onChange={(e) => {
+                              if (readOnly) return
+                              const nextSet = new Set(values)
+                              if (e.target.checked) nextSet.add(colKey)
+                              else nextSet.delete(colKey)
+                              let next = Array.from(nextSet)
+                              if (fieldType === 'checkbox_limited') {
+                                next = next.slice(0, Math.max(1, Math.trunc(maxPerRow)))
+                              }
+                              onChange({ ...matrixValue, [rowKey]: next })
+                            }}
+                          />
+                        </td>
+                      )
+                    }
+                    if (fieldType === 'text' || fieldType === 'number') {
+                      return colIdx === 0 ? (
+                        <td key={`${rowKey}-${colKey}`} className={styles.matrixCell}>
+                          <Input
+                            block
+                            type={fieldType === 'number' ? 'number' : 'text'}
+                            value={
+                              typeof rowValue === 'string' || typeof rowValue === 'number'
+                                ? String(rowValue)
+                                : ''
+                            }
+                            disabled={readOnly}
+                            readOnly={readOnly}
+                            onChange={(e) => {
+                              if (readOnly) return
+                              onChange({ ...matrixValue, [rowKey]: e.target.value })
+                            }}
+                          />
+                        </td>
+                      ) : (
+                        <td key={`${rowKey}-${colKey}`} />
+                      )
+                    }
+                    return (
+                      <td key={`${rowKey}-${colKey}`} className={styles.matrixCell}>
+                        <input
+                          type="radio"
+                          name={`matrix-${question.id}-${rowKey}`}
+                          checked={String(rowValue ?? '') === colKey}
+                          disabled={readOnly}
+                          onChange={() => {
+                            if (readOnly) return
+                            onChange({ ...matrixValue, [rowKey]: colKey })
+                          }}
+                        />
+                      </td>
+                    )
+                  })}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </FormField>
+  )
+}
+
 export function QuestionField({
   question,
   value,
@@ -76,6 +256,7 @@ export function QuestionField({
   completedValuesByCode,
   dynamicOptions,
   allowCompletedFallback = false,
+  isDriverForCascade = false,
   readOnly = false,
   onChange,
 }: QuestionFieldProps) {
@@ -85,20 +266,22 @@ export function QuestionField({
   const staticOptions = (question.options || []).map((o) => ({
     value: String(o.value),
     label: o.label,
+    id: o.value,
     isExclusive: o.isExclusive,
     isNA: o.isNA,
   }))
   const sourceOptions =
     dynamicOptions && dynamicOptions.length > 0
-      ? dynamicOptions.map((o) => ({
+      ? dynamicOptions.map((o, idx) => ({
           value: String(o.value),
           label: o.label,
+          id: `dyn-${idx}-${o.value}`,
           isExclusive: false,
           isNA: false,
         }))
       : staticOptions
 
-  const shouldSkipCompleted = getConfigBoolean(question.config, 'skipCompletedInLoop')
+  const shouldSkipCompleted = shouldHideCompletedInLoop(question.config, isDriverForCascade)
   const completedKeys = completedValuesByCode[code] ?? []
   const { visibleOptions, hiddenCount, usedFallback } = getVisibleOptionsWithCompletedFallback({
     options: sourceOptions,
@@ -117,18 +300,81 @@ export function QuestionField({
       ? `Уже отправлено: ${hiddenCount} из ${sourceOptions.length}${usedFallback ? '. Показаны все варианты.' : ''}`
       : undefined
 
+  if (type === 'intro') {
+    return (
+      <FormField label={question.title} hint={question.description || undefined}>
+        <p className={styles.introText}>
+          {String(question.config?.text ?? question.description ?? '')}
+        </p>
+      </FormField>
+    )
+  }
+
   if (type === 'boolean') {
     return (
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-        <label style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+        <label className={styles.inlineCheck}>
           <input
             type="checkbox"
             checked={Boolean(value)}
             disabled={readOnly}
             onChange={(e) => onChange(e.target.checked)}
           />
-          <span>{question.description || 'Да'}</span>
+          <span>Да</span>
         </label>
+      </FormField>
+    )
+  }
+
+  if (type === 'matrix') {
+    return <MatrixField question={question} value={value} readOnly={readOnly} onChange={onChange} />
+  }
+
+  if (type === 'rank') {
+    const opts = (question.options?.length ? question.options : sourceOptions).map((o, idx) => ({
+      id: String(('id' in o && o.id) || `rank-${idx}-${o.value}`),
+      label: o.label,
+      value: String(o.value),
+    }))
+    return (
+      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+        <RankOrderEditor
+          options={opts}
+          value={asStringList(value)}
+          disabled={readOnly}
+          onChange={(next) => {
+            if (readOnly) return
+            onChange(next)
+          }}
+        />
+      </FormField>
+    )
+  }
+
+  if (type === 'photo') {
+    const cfg = question.config ?? {}
+    const maxFiles =
+      typeof cfg.photoMax === 'number'
+        ? cfg.photoMax
+        : typeof cfg.maxFiles === 'number'
+          ? cfg.maxFiles
+          : 1
+    const limit = Math.max(1, maxFiles)
+    return (
+      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+        <FileUploader
+          value={asStringList(value)}
+          multiple={limit > 1}
+          maxFiles={limit}
+          disabled={readOnly}
+          accept="image/*,.pdf"
+          buttonLabel={limit > 1 ? 'Выбрать файлы' : 'Выбрать файл'}
+          hint={`Максимум файлов: ${limit}`}
+          onChange={(names) => {
+            if (readOnly) return
+            onChange(names)
+          }}
+        />
       </FormField>
     )
   }
@@ -187,9 +433,9 @@ export function QuestionField({
         required={question.required}
         hint={completedHint || question.description || undefined}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className={styles.radioGroup}>
           {visibleOptions.map((option) => (
-            <label key={option.value} style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+            <label key={option.value} className={styles.inlineCheck}>
               <input
                 type="radio"
                 name={code}
@@ -240,6 +486,8 @@ export function QuestionField({
     const max = typeof cfg.max === 'number' ? cfg.max : 5
     const step = typeof cfg.step === 'number' ? cfg.step : 1
     const ui = getConfigString(cfg, 'ui') ?? 'slider'
+    const minLabel = typeof cfg.minLabel === 'string' ? cfg.minLabel : ''
+    const maxLabel = typeof cfg.maxLabel === 'string' ? cfg.maxLabel : ''
     const scaleOptions = Array.from({ length: Math.floor((max - min) / step) + 1 }, (_, i) => ({
       value: String(min + i * step),
       label: String(min + i * step),
@@ -273,60 +521,64 @@ export function QuestionField({
           disabled={readOnly}
           value={Number.isFinite(rangeValue) ? rangeValue : min}
           onChange={(e) => onChange(String(e.target.value))}
-          style={{ width: '100%' }}
+          className={styles.range}
         />
+        <div className={styles.scaleLabels}>
+          <span>{minLabel || min}</span>
+          <span>{maxLabel || max}</span>
+        </div>
       </FormField>
     )
   }
 
   if (type === 'nps') {
+    const cfg = question.config ?? {}
+    const minLabel =
+      typeof cfg.minLabel === 'string' ? cfg.minLabel : 'Совсем не рекомендую'
+    const maxLabel = typeof cfg.maxLabel === 'string' ? cfg.maxLabel : 'Точно рекомендую'
     const npsValue = typeof value === 'string' || typeof value === 'number' ? String(value) : ''
     return (
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(11, minmax(0, 1fr))', gap: 6 }}>
+        <div className={styles.npsGrid}>
           {Array.from({ length: 11 }, (_, i) => String(i)).map((item) => (
             <button
               key={item}
               type="button"
               disabled={readOnly}
+              className={npsValue === item ? styles.npsBtnActive : styles.npsBtn}
               onClick={() => {
                 if (readOnly) return
                 onChange(item)
-              }}
-              style={{
-                border:
-                  npsValue === item ? '1px solid rgba(66, 170, 255, 0.8)' : '1px solid rgba(0,0,0,0.12)',
-                borderRadius: 8,
-                background: npsValue === item ? 'rgba(66, 170, 255, 0.14)' : 'rgba(255,255,255,0.9)',
-                minHeight: 36,
-                cursor: readOnly ? 'default' : 'pointer',
               }}
             >
               {item}
             </button>
           ))}
         </div>
+        <div className={styles.scaleLabels}>
+          <span>{minLabel}</span>
+          <span>{maxLabel}</span>
+        </div>
       </FormField>
     )
   }
 
-  if (type.includes('area') || type === 'textarea' || type === 'long_text') {
+  if (type === 'long_text' || type.includes('area') || type === 'textarea') {
     return (
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
         <Textarea
           block
-          rows={3}
+          rows={4}
           value={stringValue}
           disabled={readOnly}
           readOnly={readOnly}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={question.description || undefined}
         />
       </FormField>
     )
   }
 
-  if (type.includes('number') || type === 'integer' || type === 'decimal' || type === 'money') {
+  if (type === 'number' || type === 'money' || type === 'integer' || type === 'decimal') {
     return (
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
         <Input
@@ -335,6 +587,7 @@ export function QuestionField({
           value={stringValue}
           disabled={readOnly}
           readOnly={readOnly}
+          placeholder={type === 'money' ? '0.00' : '0'}
           onChange={(e) => {
             const raw = e.target.value
             if (!raw.trim()) {
@@ -349,12 +602,71 @@ export function QuestionField({
     )
   }
 
-  if (type === 'date' || type === 'datetime') {
+  if (type === 'date') {
+    const raw = typeof value === 'string' ? value : ''
+    const datePart = raw.includes('T') ? raw.slice(0, 10) : raw.slice(0, 10)
     return (
       <FormField label={question.title} required={question.required} hint={question.description || undefined}>
         <Input
           block
-          type={type === 'datetime' ? 'datetime-local' : 'date'}
+          type="date"
+          value={datePart}
+          disabled={readOnly}
+          readOnly={readOnly}
+          onChange={(e) => {
+            const v = e.target.value
+            if (!v) {
+              onChange(null)
+              return
+            }
+            onChange(toIsoDate(new Date(`${v}T00:00:00`)))
+          }}
+        />
+      </FormField>
+    )
+  }
+
+  if (type === 'datetime') {
+    const raw = typeof value === 'string' ? value : ''
+    let local = ''
+    if (raw) {
+      const d = new Date(raw)
+      if (!Number.isNaN(d.getTime())) local = toIsoDateTimeLocal(d)
+    }
+    return (
+      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+        <Input
+          block
+          type="datetime-local"
+          value={local}
+          disabled={readOnly}
+          readOnly={readOnly}
+          onChange={(e) => {
+            const v = e.target.value
+            if (!v) {
+              onChange(null)
+              return
+            }
+            const d = new Date(v)
+            onChange(Number.isNaN(d.getTime()) ? v : d.toISOString())
+          }}
+        />
+      </FormField>
+    )
+  }
+
+  if (
+    type === 'email' ||
+    type === 'phone' ||
+    type === 'text' ||
+    type === 'short_text' ||
+    type === 'string'
+  ) {
+    return (
+      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+        <Input
+          block
+          type={type === 'email' ? 'email' : type === 'phone' ? 'tel' : 'text'}
           value={stringValue}
           disabled={readOnly}
           readOnly={readOnly}
@@ -364,25 +676,9 @@ export function QuestionField({
     )
   }
 
-  if (type === 'intro') {
-    return (
-      <FormField label={question.title} hint={question.description || undefined}>
-        <p style={{ margin: 0, color: 'inherit', opacity: 0.8 }}>
-          {String(question.config?.text ?? question.description ?? '')}
-        </p>
-      </FormField>
-    )
-  }
-
   return (
     <FormField label={question.title} required={question.required} hint={question.description || undefined}>
-      <Input
-        block
-        value={stringValue}
-        disabled={readOnly}
-        readOnly={readOnly}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <p className={styles.unsupported}>Тип «{question.type}» пока не поддержан</p>
     </FormField>
   )
 }

@@ -1,0 +1,103 @@
+.introText {
+  margin: 0;
+  opacity: 0.85;
+  line-height: 1.45;
+}
+
+.inlineCheck {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.range {
+  width: 100%;
+}
+
+.scaleLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.npsGrid {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.npsBtn,
+.npsBtnActive {
+  border-radius: 8px;
+  min-height: 36px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+}
+
+.npsBtnActive {
+  border-color: rgba(66, 170, 255, 0.8);
+  background: rgba(66, 170, 255, 0.14);
+}
+
+.matrixStack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.matrixRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.matrixRowLabel {
+  font-weight: 500;
+}
+
+.matrixScroll {
+  overflow-x: auto;
+}
+
+.matrixTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+
+  th,
+  td {
+    padding: 6px 8px;
+    vertical-align: middle;
+  }
+
+  th {
+    text-align: center;
+    font-weight: 500;
+  }
+
+  th:first-child,
+  td:first-child {
+    text-align: left;
+  }
+}
+
+.matrixCell {
+  text-align: center;
+}
+
+.unsupported {
+  margin: 0;
+  opacity: 0.7;
+  font-size: 14px;
+}

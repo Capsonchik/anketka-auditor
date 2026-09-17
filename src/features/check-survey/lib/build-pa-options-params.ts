@@ -21,6 +21,11 @@ export function getDependsOnCodesFromConfig(config: Record<string, unknown> | nu
   if (Array.isArray(config.dependsOnCodes)) {
     return config.dependsOnCodes.map((item) => String(item).trim()).filter(Boolean)
   }
+  // Новый cascade API (valueColumn/labelColumn) — зависимости только из filters/dependsOnCodes
+  if (getConfigString(config, 'valueColumn') || getConfigString(config, 'labelColumn')) {
+    return []
+  }
+
   const source = getConfigString(config, 'source')
   if (source === 'ref_cities') return ['region']
   if (source === 'project_shop_addresses') return ['shopBrand']

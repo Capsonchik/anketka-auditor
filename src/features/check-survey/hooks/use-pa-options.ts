@@ -16,11 +16,19 @@ import {
 type UsePaOptionsParams = {
   token: string
   questions: PublicPaQuestion[]
+  /** Коды всех вопросов анкеты — legacy depends без таких вопросов игнорируем (как в /pa) */
+  allQuestionCodes?: Set<string>
   answers: AnswersMap
   enabled?: boolean
 }
 
-export function usePaOptions({ token, questions, answers, enabled = true }: UsePaOptionsParams) {
+export function usePaOptions({
+  token,
+  questions,
+  allQuestionCodes,
+  answers,
+  enabled = true,
+}: UsePaOptionsParams) {
   const [fetchOptions] = useLazyGetPublicPaOptionsQuery()
   const [optionsByCode, setOptionsByCode] = useState<Record<string, PublicPaOptionsItem[]>>({})
   const keyByCodeRef = useRef<Record<string, string>>({})
@@ -40,6 +48,17 @@ export function usePaOptions({ token, questions, answers, enabled = true }: UseP
     [questions],
   )
 
+  const pageQuestionCodes = useMemo(() => {
+    const set = new Set<string>()
+    for (const q of questions) {
+      const code = questionAnswerKey(q)
+      if (code) set.add(code)
+    }
+    return set
+  }, [questions])
+
+  const knownCodes = allQuestionCodes ?? pageQuestionCodes
+
   const answersKey = useMemo(() => JSON.stringify(answers), [answers])
 
   useEffect(() => {
@@ -57,10 +76,13 @@ export function usePaOptions({ token, questions, answers, enabled = true }: UseP
         if (!params) continue
 
         const depends = getDependsOnCodesFromConfig(question.config)
-        const missingDepends = depends.some((dep) => {
-          const value = answers[dep]
-          return !(typeof value === 'string' || typeof value === 'number') || !String(value).trim()
-        })
+        // Как в PaPage: ждём только depends, которые реально есть вопросами в анкете
+        const missingDepends = depends
+          .filter((dep) => knownCodes.has(dep))
+          .some((dep) => {
+            const value = answers[dep]
+            return !(typeof value === 'string' || typeof value === 'number') || !String(value).trim()
+          })
         if (missingDepends) continue
 
         const key = buildPaOptionsCacheKey(params)
@@ -81,8 +103,7 @@ export function usePaOptions({ token, questions, answers, enabled = true }: UseP
     return () => {
       cancelled = true
     }
-    // answersKey/questionsKey stabilize effect without looping on options state
-  }, [answers, answersKey, enabled, fetchOptions, questions, questionsKey, token])
+  }, [answers, answersKey, enabled, fetchOptions, knownCodes, questions, questionsKey, token])
 
   return { optionsByCode, clearOptionsForCodes }
 }
