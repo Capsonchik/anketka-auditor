@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { use, useEffect, useMemo, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 
 import {
   useGetAssignmentQuery,
@@ -11,10 +11,7 @@ import {
   useGetPublicPaDraftQuery,
   useGetPublicPaQuery,
 } from '@/entities/public-pa'
-import {
-  CheckSurveyForm,
-  extractAnswersFromDraft,
-} from '@/features/check-survey'
+import { CheckSurveyForm } from '@/features/check-survey'
 import { Loader } from '@/shared/ui'
 
 import styles from './page.module.scss'
@@ -85,11 +82,6 @@ export default function AssignmentCheckPage({ params }: PageProps) {
       skip: !canLoadPa || !inviteToken,
     },
   )
-
-  const initialAnswers = useMemo(() => {
-    const draft = draftQuery.data?.draft ?? null
-    return extractAnswersFromDraft(draft)
-  }, [draftQuery.data?.draft])
 
   if (assignmentQuery.isLoading) {
     return (
@@ -172,9 +164,9 @@ export default function AssignmentCheckPage({ params }: PageProps) {
       <CheckSurveyForm
         assignment={assignment}
         session={paQuery.data}
-        initialAnswers={initialAnswers}
+        initialDraft={draftQuery.data?.draft ?? null}
         onSubmitted={async () => {
-          await assignmentQuery.refetch()
+          await Promise.all([assignmentQuery.refetch(), draftQuery.refetch()])
         }}
       />
     </div>

@@ -3,6 +3,7 @@ import type {
   PublicPaDraftBody,
   PublicPaDraftResponse,
   PublicPaDraftSaveResponse,
+  PublicPaOptionsResponse,
   PublicPaSession,
   PublicPaSubmitBody,
 } from '../model/types'
@@ -10,6 +11,11 @@ import type {
 export type GetPublicPaDraftArg = {
   token: string
   checkId?: string | null
+}
+
+export type GetPublicPaOptionsArg = {
+  token: string
+  params: Record<string, string>
 }
 
 export const publicPaApi = api.injectEndpoints({
@@ -30,6 +36,19 @@ export const publicPaApi = api.injectEndpoints({
       providesTags: (_r, _e, arg) => {
         const token = typeof arg === 'string' ? arg : arg.token
         return [{ type: 'PublicPaDraft', id: token }]
+      },
+    }),
+    getPublicPaOptions: build.query<PublicPaOptionsResponse, GetPublicPaOptionsArg>({
+      query: ({ token, params }) => ({
+        url: `/api/v1/public/pa/${token}/options`,
+        params,
+      }),
+      serializeQueryArgs: ({ queryArgs }) => {
+        const entries = Object.entries(queryArgs.params)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => `${k}=${v}`)
+          .join('&')
+        return `${queryArgs.token}?${entries}`
       },
     }),
     savePublicPaDraft: build.mutation<
@@ -62,8 +81,10 @@ export const publicPaApi = api.injectEndpoints({
 export const {
   useGetPublicPaQuery,
   useGetPublicPaDraftQuery,
+  useGetPublicPaOptionsQuery,
   useLazyGetPublicPaQuery,
   useLazyGetPublicPaDraftQuery,
+  useLazyGetPublicPaOptionsQuery,
   useSavePublicPaDraftMutation,
   useSubmitPublicPaMutation,
 } = publicPaApi
