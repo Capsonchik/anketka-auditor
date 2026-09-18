@@ -1,0 +1,48 @@
+.root {
+  margin-bottom: $spacing-4;
+}
+
+.title {
+  margin: 0 0 $spacing-2;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+.triggerRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  min-width: 0;
+  width: 100%;
+}
+
+.index {
+  flex: 0 0 auto;
+  min-width: 1.5rem;
+  font-size: $font-size-xs;
+  color: $text-secondary;
+}
+
+.label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: $font-size-sm;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+}

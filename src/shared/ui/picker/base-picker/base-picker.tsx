@@ -133,7 +133,9 @@ export const BasePicker = <V,>({
 
     if (multiple && Array.isArray(value)) {
       const selectedItems = data.filter(item => value.some(v => String(v) === String(item.value)));
-      if (selectedItems.length === 0) return value.join(', ');
+      if (selectedItems.length === 0) {
+        return <span className={clsx(styles.value, styles.placeholder)}>{placeholder}</span>;
+      }
       return (
         <span className={styles.value}>
           {selectedItems.map(item => item.label).join(', ')}
@@ -141,8 +143,12 @@ export const BasePicker = <V,>({
       );
     }
 
-    const selectedItem = data.find(item => item.value === value);
-    return <span className={styles.value}>{selectedItem ? selectedItem.label : String(value)}</span>;
+    const selectedItem = data.find(item => String(item.value) === String(value));
+    // Нет в data — placeholder, а не «призрак» прошлого выбора
+    if (!selectedItem) {
+      return <span className={clsx(styles.value, styles.placeholder)}>{placeholder}</span>;
+    }
+    return <span className={styles.value}>{selectedItem.label}</span>;
   };
 
   const defaultRenderMenuItem = (item: PickerItem) => {

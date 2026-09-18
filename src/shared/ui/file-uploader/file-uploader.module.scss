@@ -61,6 +61,62 @@
   }
 }
 
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+  margin: $spacing-2 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.thumbItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+  width: 96px;
+}
+
+.thumbImg {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: $radius-md;
+  border: 1px solid $border-color;
+  background: $bg-secondary;
+}
+
+.thumbFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: $radius-md;
+  border: 1px dashed $border-color;
+  background: $bg-secondary;
+}
+
+.thumbFallbackImage {
+  border-style: solid;
+}
+
+.thumbExt {
+  font-size: $font-size-xs;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: $text-secondary;
+}
+
+.thumbName {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .hint {
   margin-top: $spacing-1;
   font-size: $font-size-xs;

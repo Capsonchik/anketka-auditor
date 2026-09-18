@@ -5,6 +5,7 @@ export type {
   PublicPaDraftPayload,
   PublicPaDraftResponse,
   PublicPaDraftSaveResponse,
+  PublicPaLoopIteration,
   PublicPaOption,
   PublicPaOptionsItem,
   PublicPaOptionsResponse,

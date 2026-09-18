@@ -3,10 +3,14 @@ import './globals.css'
 import { ErrorBoundaryProvider, StoreProvider, ThemeProvider } from '@core/providers'
 import { I18nProvider } from '@core/providers/i18n-provider'
 import { montserrat, openSans } from '@shared/config/fonts'
+import { ToasterProvider } from '@shared/ui/toaster'
 
 export const metadata: Metadata = {
-  title: 'BI Next App',
-  description: 'BI Next.js application with FSD architecture',
+  title: {
+    default: 'Survey-all — Кабинет аудитора',
+    template: '%s · Survey-all',
+  },
+  description: 'Кабинет аудитора Survey-all: задания, карта, заполнение анкет',
 }
 
 interface RootLayoutProps {
@@ -21,12 +25,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <StoreProvider>
             <I18nProvider>
               <ThemeProvider defaultTheme="dark">
-                {children}
+                <ToasterProvider>{children}</ToasterProvider>
               </ThemeProvider>
             </I18nProvider>
           </StoreProvider>
         </ErrorBoundaryProvider>
-
       </body>
     </html>
   )

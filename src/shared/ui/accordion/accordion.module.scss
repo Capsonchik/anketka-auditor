@@ -1,0 +1,105 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+  width: 100%;
+}
+
+.item {
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  background: $bg-secondary;
+  overflow: hidden;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &.itemOpen {
+    border-color: rgba($primary, 0.45);
+    background: $bg-primary;
+  }
+
+  &.itemDisabled {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+}
+
+.heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  width: 100%;
+  padding: $spacing-3 $spacing-3;
+  border: none;
+  background: transparent;
+  color: $text-primary;
+  text-align: left;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: rgba($primary, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.triggerContent {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.chevron {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: $text-secondary;
+  transition: transform 0.28s ease;
+
+  [data-state='open'] > & {
+    transform: rotate(180deg);
+  }
+}
+
+/* Высота только CSS: 0fr → 1fr, без JS-замеров */
+.content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
+}
+
+.contentOpen {
+  grid-template-rows: 1fr;
+}
+
+.contentInner {
+  overflow: hidden;
+  min-height: 0;
+  padding: 0 $spacing-3;
+  border-top: 1px solid transparent;
+  transition: padding 0.28s ease, border-color 0.28s ease;
+
+  .contentOpen > & {
+    padding: $spacing-3;
+    border-top-color: $border-color;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content,
+  .contentInner,
+  .chevron {
+    transition: none;
+  }
+}

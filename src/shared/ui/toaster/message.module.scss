@@ -1,0 +1,110 @@
+@use "@shared/styles/_prelude.scss" as *;
+
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px var(--color-shadow, rgba(0, 0, 0, 0.12));
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.bordered {
+  border: 1px solid var(--border-color);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.content {
+  color: var(--text-secondary);
+}
+
+.close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin: -2px -4px 0 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+}
+
+.type-info {
+  border-left: 4px solid var(--info-500);
+
+  .icon {
+    color: var(--info-500);
+  }
+}
+
+.type-success {
+  border-left: 4px solid var(--success-500);
+
+  .icon {
+    color: var(--success-500);
+  }
+}
+
+.type-warning {
+  border-left: 4px solid var(--warning-500);
+
+  .icon {
+    color: var(--warning-500);
+  }
+}
+
+.type-error {
+  border-left: 4px solid var(--danger-500);
+
+  .icon {
+    color: var(--danger-500);
+  }
+}
+
+.type-import {
+  border-left: 4px solid var(--success-500);
+
+  .icon {
+    color: var(--success-500);
+  }
+}
+
+.type-important {
+  border-left: 4px solid var(--primary-500);
+
+  .icon {
+    color: var(--primary-500);
+  }
+}

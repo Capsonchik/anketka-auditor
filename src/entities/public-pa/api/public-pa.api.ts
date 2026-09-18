@@ -62,15 +62,21 @@ export const publicPaApi = api.injectEndpoints({
       }),
       invalidatesTags: (_r, _e, { token }) => [{ type: 'PublicPaDraft', id: token }],
     }),
-    submitPublicPa: build.mutation<void, { token: string; body: PublicPaSubmitBody }>({
+    submitPublicPa: build.mutation<null, { token: string; body: PublicPaSubmitBody }>({
       query: ({ token, body }) => ({
         url: `/api/v1/public/pa/${token}/submit`,
         method: 'POST',
         body,
+        // 204 / пустое тело: нельзя вернуть undefined — RTK падает с «neither error nor result»
         responseHandler: async (response) => {
-          if (response.status === 204) return undefined
+          if (response.status === 204) return null
           const text = await response.text()
-          return text ? JSON.parse(text) : undefined
+          if (!text) return null
+          try {
+            return JSON.parse(text) as unknown
+          } catch {
+            return null
+          }
         },
       }),
       invalidatesTags: ['Assignments', 'PublicPaDraft', 'MapMarkers'],

@@ -34,7 +34,8 @@ export const FormField: React.FC<FormFieldProps> = ({
       <div className={styles.control}>
         {children}
       </div>
-      {hint && !error && <p className={styles.hint}>{hint}</p>}
+      {typeof error === 'string' && error ? <p className={styles.error}>{error}</p> : null}
+      {hint && !error ? <p className={styles.hint}>{hint}</p> : null}
     </div>
   );
 };

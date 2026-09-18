@@ -59,11 +59,22 @@ export type PublicPaCompletionMeta = {
   allCompleted: boolean
 }
 
+export type PublicPaLoopIteration = {
+  id: string
+  /** Ключ completedValues (SKU / cascade key) */
+  key: string
+  label: string
+  product: Record<string, unknown>
+  submittedAt: string
+}
+
 export type PublicPaDraftPayload = {
   pageIdx?: number
   answers?: Record<string, unknown>
   submittedCount?: number
   completedValuesByCode?: Record<string, string[]>
+  /** Снимки product-ответов по итерациям loop (для просмотра после отправки) */
+  loopIterations?: PublicPaLoopIteration[]
   savedAt?: string
   completion?: Partial<PublicPaCompletionMeta> | null
 }

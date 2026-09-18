@@ -13,6 +13,21 @@
   margin-bottom: $spacing-5;
 }
 
+.sectionEnterForward {
+  @include fade-in-up('right', 18px, 0.28s);
+}
+
+.sectionEnterBack {
+  @include fade-in-up('left', 18px, 0.28s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionEnterForward,
+  .sectionEnterBack {
+    animation: none;
+  }
+}
+
 .sectionTitle {
   font-size: $font-size-lg;
   font-weight: $font-weight-medium;
@@ -52,15 +67,6 @@
   border-radius: $radius-md;
   outline: 1px solid rgba($danger, 0.35);
   background: rgba($danger, 0.04);
-}
-
-.notice {
-  margin-bottom: $spacing-3;
-  padding: $spacing-2 $spacing-3;
-  border-radius: $radius-md;
-  background: rgba($primary, 0.08);
-  color: $primary;
-  font-size: $font-size-sm;
 }
 
 .submittedBox {

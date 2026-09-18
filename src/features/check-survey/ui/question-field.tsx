@@ -1,10 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { FormField } from '@/shared/ui/form-field'
 import { Input, Textarea } from '@/shared/ui/input'
 import { CheckPicker, SelectPicker } from '@/shared/ui/picker'
 import { PillSwitchFlexible } from '@/shared/ui/pill-switch-flexible'
 import { FileUploader } from '@/shared/ui/file-uploader'
+import { TimeInput, toTimeInputValue } from '@/shared/ui/time-input'
 import type { PublicPaOptionsItem, PublicPaOption, PublicPaQuestion } from '@/entities/public-pa'
 import { getConfigString, questionAnswerKey } from '@/entities/public-pa'
 
@@ -28,10 +31,23 @@ type QuestionFieldProps = {
   answers: AnswersMap
   completedValuesByCode: Record<string, string[]>
   dynamicOptions?: PublicPaOptionsItem[]
+  /** Реальный fetch options; не путать с «ещё нет списка» */
+  isOptionsLoading?: boolean
   allowCompletedFallback?: boolean
   isDriverForCascade?: boolean
   readOnly?: boolean
+  /** Сообщение RHF / yup */
+  error?: string
   onChange: (next: unknown) => void
+}
+
+function fieldMeta(question: PublicPaQuestion, error?: string, hint?: string | null) {
+  return {
+    label: question.title,
+    required: question.required,
+    error: error || undefined,
+    hint: error ? undefined : hint || question.description || undefined,
+  }
 }
 
 function resolveChoiceUi(type: string, config: Record<string, unknown> | null): ChoiceUi | null {
@@ -97,11 +113,13 @@ function MatrixField({
   question,
   value,
   readOnly,
+  error,
   onChange,
 }: {
   question: PublicPaQuestion
   value: unknown
   readOnly: boolean
+  error?: string
   onChange: (next: unknown) => void
 }) {
   const cfg = question.config ?? {}
@@ -124,7 +142,7 @@ function MatrixField({
       return { value: colKey, label: String(column.label ?? `Колонка ${colIdx + 1}`) }
     })
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...fieldMeta(question, error)}>
         <div className={styles.matrixStack}>
           {rows.map((row, rowIdx) => {
             const rowKey = String(row.id || row.label || `row_${rowIdx + 1}`)
@@ -143,6 +161,7 @@ function MatrixField({
                   placeholder="Выберите…"
                   data={columnOptions}
                   value={stringRow || null}
+                  error={error}
                   onChange={(next) => {
                     if (readOnly) return
                     onChange({ ...matrixValue, [rowKey]: next == null ? null : String(next) })
@@ -157,7 +176,7 @@ function MatrixField({
   }
 
   return (
-    <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+    <FormField {...fieldMeta(question, error)}>
       <div className={styles.matrixScroll}>
         <table className={styles.matrixTable}>
           <thead>
@@ -255,14 +274,16 @@ export function QuestionField({
   answers,
   completedValuesByCode,
   dynamicOptions,
+  isOptionsLoading = false,
   allowCompletedFallback = false,
   isDriverForCascade = false,
   readOnly = false,
+  error,
   onChange,
 }: QuestionFieldProps) {
   const type = String(question.type || '').toLowerCase()
   const code = questionAnswerKey(question)
-  const hasDynamicSource = Boolean(getConfigString(question.config, 'source'))
+  const meta = (hint?: string | null) => fieldMeta(question, error, hint)
   const staticOptions = (question.options || []).map((o) => ({
     value: String(o.value),
     label: o.label,
@@ -292,7 +313,8 @@ export function QuestionField({
   })
 
   const pickerData = toPickerData(visibleOptions)
-  const optionsLoading = hasDynamicSource && (!dynamicOptions || dynamicOptions.length === 0)
+  // Лоадер только пока идёт запрос и показывать ещё нечего (есть static/dynamic — не крутим)
+  const optionsLoading = isOptionsLoading && visibleOptions.length === 0
   const stringValue = value == null ? '' : String(value)
   const choiceUi = resolveChoiceUi(type, question.config)
   const completedHint =
@@ -300,9 +322,50 @@ export function QuestionField({
       ? `Уже отправлено: ${hiddenCount} из ${sourceOptions.length}${usedFallback ? '. Показаны все варианты.' : ''}`
       : undefined
 
+  // После continue выбранный SKU скрывается из списка — нельзя оставлять «призрак» в value
+  const valueInVisibleOptions =
+    !stringValue || visibleOptions.some((option) => String(option.value) === stringValue)
+  const selectDisplayValue =
+    stringValue && (valueInVisibleOptions || readOnly) ? stringValue : null
+  const checkDisplayValues = readOnly
+    ? asStringList(value)
+    : asStringList(value).filter((item) =>
+        visibleOptions.some((option) => String(option.value) === item),
+      )
+
+  // Readonly: если value нет в options — добавляем синтетическую опцию для подписи
+  const pickerDataWithValue =
+    readOnly && selectDisplayValue && !valueInVisibleOptions
+      ? [...pickerData, { value: selectDisplayValue, label: selectDisplayValue }]
+      : pickerData
+
+  useEffect(() => {
+    if (readOnly || optionsLoading) return
+    if (choiceUi === 'select' || choiceUi === 'radio') {
+      if (stringValue && !valueInVisibleOptions) onChange(null)
+      return
+    }
+    if (choiceUi === 'check') {
+      const selected = asStringList(value)
+      if (selected.length === 0) return
+      const allowed = new Set(visibleOptions.map((option) => String(option.value)))
+      const next = selected.filter((item) => allowed.has(item))
+      if (next.length !== selected.length) onChange(next)
+    }
+  }, [
+    readOnly,
+    optionsLoading,
+    choiceUi,
+    stringValue,
+    valueInVisibleOptions,
+    value,
+    visibleOptions,
+    onChange,
+  ])
+
   if (type === 'intro') {
     return (
-      <FormField label={question.title} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <p className={styles.introText}>
           {String(question.config?.text ?? question.description ?? '')}
         </p>
@@ -312,7 +375,7 @@ export function QuestionField({
 
   if (type === 'boolean') {
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <label className={styles.inlineCheck}>
           <input
             type="checkbox"
@@ -327,7 +390,7 @@ export function QuestionField({
   }
 
   if (type === 'matrix') {
-    return <MatrixField question={question} value={value} readOnly={readOnly} onChange={onChange} />
+    return <MatrixField question={question} value={value} readOnly={readOnly} error={error} onChange={onChange} />
   }
 
   if (type === 'rank') {
@@ -337,7 +400,7 @@ export function QuestionField({
       value: String(o.value),
     }))
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <RankOrderEditor
           options={opts}
           value={asStringList(value)}
@@ -361,7 +424,7 @@ export function QuestionField({
           : 1
     const limit = Math.max(1, maxFiles)
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <FileUploader
           value={asStringList(value)}
           multiple={limit > 1}
@@ -369,7 +432,7 @@ export function QuestionField({
           disabled={readOnly}
           accept="image/*,.pdf"
           buttonLabel={limit > 1 ? 'Выбрать файлы' : 'Выбрать файл'}
-          hint={`Максимум файлов: ${limit}`}
+          hint={`Максимум файлов: ${limit}. Размер одного файла — до 30 МБ`}
           onChange={(names) => {
             if (readOnly) return
             onChange(names)
@@ -380,13 +443,9 @@ export function QuestionField({
   }
 
   if (choiceUi === 'check') {
-    const selected = asStringList(value)
+    const selected = checkDisplayValues
     return (
-      <FormField
-        label={question.title}
-        required={question.required}
-        hint={completedHint || question.description || undefined}
-      >
+      <FormField {...meta(completedHint || question.description)}>
         <CheckPicker
           block
           cleanable={!readOnly}
@@ -394,8 +453,9 @@ export function QuestionField({
           loading={optionsLoading}
           searchable
           placeholder={optionsLoading ? 'Загрузка…' : 'Выберите…'}
-          data={pickerData}
+          data={pickerDataWithValue}
           value={selected}
+          error={error}
           onChange={(next) => {
             if (readOnly) return
             onChange(applyExclusiveMultiChange(question.options || [], selected, next || []))
@@ -408,17 +468,13 @@ export function QuestionField({
   if (choiceUi === 'radio') {
     if (visibleOptions.length > 0 && visibleOptions.length <= 8) {
       return (
-        <FormField
-          label={question.title}
-          required={question.required}
-          hint={completedHint || question.description || undefined}
-        >
+        <FormField {...meta(completedHint || question.description)}>
           <PillSwitchFlexible
             name={code}
             size="small"
             disabled={readOnly}
-            data={pickerData}
-            value={stringValue}
+            data={pickerDataWithValue}
+            value={selectDisplayValue || ''}
             onChange={(next) => {
               if (readOnly) return
               onChange(String(next))
@@ -428,11 +484,7 @@ export function QuestionField({
       )
     }
     return (
-      <FormField
-        label={question.title}
-        required={question.required}
-        hint={completedHint || question.description || undefined}
-      >
+      <FormField {...meta(completedHint || question.description)}>
         <div className={styles.radioGroup}>
           {visibleOptions.map((option) => (
             <label key={option.value} className={styles.inlineCheck}>
@@ -440,7 +492,7 @@ export function QuestionField({
                 type="radio"
                 name={code}
                 value={option.value}
-                checked={stringValue === option.value}
+                checked={selectDisplayValue === option.value}
                 disabled={readOnly}
                 onChange={() => {
                   if (readOnly) return
@@ -457,11 +509,7 @@ export function QuestionField({
 
   if (choiceUi === 'select') {
     return (
-      <FormField
-        label={question.title}
-        required={question.required}
-        hint={completedHint || question.description || undefined}
-      >
+      <FormField {...meta(completedHint || question.description)}>
         <SelectPicker
           block
           cleanable={!readOnly}
@@ -469,8 +517,9 @@ export function QuestionField({
           loading={optionsLoading}
           searchable
           placeholder={optionsLoading ? 'Загрузка…' : 'Выберите…'}
-          data={pickerData}
-          value={stringValue || null}
+          data={pickerDataWithValue}
+          value={selectDisplayValue}
+          error={error}
           onChange={(next) => {
             if (readOnly) return
             onChange(next == null ? null : String(next))
@@ -494,7 +543,7 @@ export function QuestionField({
     }))
     if (ui === 'select' || ui === 'selectpicker') {
       return (
-        <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+        <FormField {...meta()}>
           <SelectPicker
             block
             cleanable={!readOnly}
@@ -502,6 +551,7 @@ export function QuestionField({
             placeholder="Выберите…"
             data={scaleOptions}
             value={stringValue || null}
+            error={error}
             onChange={(next) => {
               if (readOnly) return
               onChange(next == null ? null : String(next))
@@ -512,7 +562,7 @@ export function QuestionField({
     }
     const rangeValue = Number(String(value ?? min).replace(',', '.'))
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <input
           type="range"
           min={min}
@@ -538,7 +588,7 @@ export function QuestionField({
     const maxLabel = typeof cfg.maxLabel === 'string' ? cfg.maxLabel : 'Точно рекомендую'
     const npsValue = typeof value === 'string' || typeof value === 'number' ? String(value) : ''
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <div className={styles.npsGrid}>
           {Array.from({ length: 11 }, (_, i) => String(i)).map((item) => (
             <button
@@ -565,13 +615,14 @@ export function QuestionField({
 
   if (type === 'long_text' || type.includes('area') || type === 'textarea') {
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <Textarea
           block
           rows={4}
           value={stringValue}
           disabled={readOnly}
           readOnly={readOnly}
+          error={error}
           onChange={(e) => onChange(e.target.value)}
         />
       </FormField>
@@ -580,7 +631,7 @@ export function QuestionField({
 
   if (type === 'number' || type === 'money' || type === 'integer' || type === 'decimal') {
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <Input
           block
           type="number"
@@ -588,6 +639,7 @@ export function QuestionField({
           disabled={readOnly}
           readOnly={readOnly}
           placeholder={type === 'money' ? '0.00' : '0'}
+          error={error}
           onChange={(e) => {
             const raw = e.target.value
             if (!raw.trim()) {
@@ -606,13 +658,14 @@ export function QuestionField({
     const raw = typeof value === 'string' ? value : ''
     const datePart = raw.includes('T') ? raw.slice(0, 10) : raw.slice(0, 10)
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <Input
           block
           type="date"
           value={datePart}
           disabled={readOnly}
           readOnly={readOnly}
+          error={error}
           onChange={(e) => {
             const v = e.target.value
             if (!v) {
@@ -620,6 +673,24 @@ export function QuestionField({
               return
             }
             onChange(toIsoDate(new Date(`${v}T00:00:00`)))
+          }}
+        />
+      </FormField>
+    )
+  }
+
+  if (type === 'time') {
+    return (
+      <FormField {...meta()}>
+        <TimeInput
+          block
+          value={toTimeInputValue(value)}
+          disabled={readOnly}
+          readOnly={readOnly}
+          error={error}
+          onChangeValue={(next) => {
+            if (readOnly) return
+            onChange(next)
           }}
         />
       </FormField>
@@ -634,13 +705,14 @@ export function QuestionField({
       if (!Number.isNaN(d.getTime())) local = toIsoDateTimeLocal(d)
     }
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <Input
           block
           type="datetime-local"
           value={local}
           disabled={readOnly}
           readOnly={readOnly}
+          error={error}
           onChange={(e) => {
             const v = e.target.value
             if (!v) {
@@ -663,13 +735,14 @@ export function QuestionField({
     type === 'string'
   ) {
     return (
-      <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+      <FormField {...meta()}>
         <Input
           block
           type={type === 'email' ? 'email' : type === 'phone' ? 'tel' : 'text'}
           value={stringValue}
           disabled={readOnly}
           readOnly={readOnly}
+          error={error}
           onChange={(e) => onChange(e.target.value)}
         />
       </FormField>
@@ -677,7 +750,7 @@ export function QuestionField({
   }
 
   return (
-    <FormField label={question.title} required={question.required} hint={question.description || undefined}>
+    <FormField {...meta()}>
       <p className={styles.unsupported}>Тип «{question.type}» пока не поддержан</p>
     </FormField>
   )

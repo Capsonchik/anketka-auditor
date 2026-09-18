@@ -1,0 +1,111 @@
+@use "@shared/styles/_prelude.scss" as *;
+
+.container {
+  position: fixed;
+  z-index: 1080;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  max-height: 100vh;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.topCenter {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+
+.topStart {
+  top: 0;
+  left: 0;
+  align-items: flex-start;
+}
+
+.topEnd {
+  top: 0;
+  right: 0;
+  align-items: flex-end;
+}
+
+.bottomCenter {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+.bottomStart {
+  bottom: 0;
+  left: 0;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+}
+
+.bottomEnd {
+  bottom: 0;
+  right: 0;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+}
+
+.itemSlot {
+  display: grid;
+  grid-template-rows: 1fr;
+  width: min(420px, calc(100vw - 40px));
+  transition:
+    grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.24s ease;
+}
+
+.itemSlotExiting {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.itemSlotInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.item {
+  pointer-events: auto;
+  width: 100%;
+}
+
+.itemEntering.itemTop {
+  animation: toastEnterTop 0.28s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.itemEntering.itemBottom {
+  animation: toastEnterBottom 0.28s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@keyframes toastEnterTop {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastEnterBottom {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

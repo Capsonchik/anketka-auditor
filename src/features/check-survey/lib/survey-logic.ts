@@ -198,7 +198,7 @@ export function isQuestionAnswerFilled(
   if (type === 'number' || type === 'money' || type === 'integer' || type === 'decimal') {
     return typeof value === 'number' && Number.isFinite(value)
   }
-  if (type === 'datetime' || type === 'date') {
+  if (type === 'datetime' || type === 'date' || type === 'time') {
     return typeof value === 'string' && value.trim().length > 0
   }
   return hasAnswer(value)

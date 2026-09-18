@@ -1,7 +1,13 @@
-import type { PublicPaCompletionMeta, PublicPaDraftPayload, PublicPaPage } from '@/entities/public-pa'
+import type {
+  PublicPaCompletionMeta,
+  PublicPaDraftPayload,
+  PublicPaLoopIteration,
+  PublicPaPage,
+} from '@/entities/public-pa'
 import { questionAnswerKey } from '@/entities/public-pa'
 
 export type AnswersMap = Record<string, unknown>
+export type { PublicPaLoopIteration }
 
 export function flattenAnswersTree(nested: Record<string, unknown>): AnswersMap {
   const out: AnswersMap = {}
@@ -85,17 +91,43 @@ export function extractSubmittedCountFromDraft(
   return Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : 0
 }
 
+export function extractLoopIterationsFromDraft(
+  draft: Record<string, unknown> | null | undefined,
+): PublicPaLoopIteration[] {
+  if (!draft || typeof draft !== 'object') return []
+  const raw = draft.loopIterations
+  if (!Array.isArray(raw)) return []
+  const out: PublicPaLoopIteration[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) continue
+    const row = item as Record<string, unknown>
+    const id = typeof row.id === 'string' ? row.id : ''
+    const key = typeof row.key === 'string' ? row.key : ''
+    const label = typeof row.label === 'string' ? row.label : key
+    const product =
+      row.product && typeof row.product === 'object' && !Array.isArray(row.product)
+        ? (row.product as Record<string, unknown>)
+        : null
+    const submittedAt = typeof row.submittedAt === 'string' ? row.submittedAt : ''
+    if (!id || !key || !product) continue
+    out.push({ id, key, label: label || key, product, submittedAt })
+  }
+  return out
+}
+
 export function buildDraftPayload(input: {
   pageIdx: number
   answers: AnswersMap
   submittedCount: number
   completedValuesByCode: Record<string, string[]>
+  loopIterations?: PublicPaLoopIteration[]
 }): PublicPaDraftPayload {
   return {
     pageIdx: input.pageIdx,
     answers: input.answers,
     submittedCount: input.submittedCount,
     completedValuesByCode: input.completedValuesByCode,
+    ...(input.loopIterations?.length ? { loopIterations: input.loopIterations } : {}),
     savedAt: new Date().toISOString(),
   }
 }
