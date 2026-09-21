@@ -268,7 +268,7 @@ export function QuestionField({
   error,
   onChange,
 }: QuestionFieldProps) {
-  const type = normalizeQuestionType(question.type)
+  const type = normalizeQuestionType(question.type, question.config ?? null)
   const code = questionAnswerKey(question)
   const meta = (hint?: string | null) => fieldMeta(question, error, hint)
   const staticOptions = (question.options || []).map((o) => ({
