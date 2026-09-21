@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server'
 import { encrypt } from '@shared/lib/crypto'
-
-const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://survey-all.ru'
+import { getBackendOrigin } from '@/shared/config/backend-origin'
 
 /**
  * Выполняет запрос к API для получения данных текущего аудитора.
@@ -12,6 +11,7 @@ const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https
  */
 export async function fetchAuditorMe(request: NextRequest, accessToken: string) {
   try {
+    const API_URL = getBackendOrigin()
     console.log(`[FetchAuditorMe] Fetching: ${API_URL}/api/v1/auditor/me`)
     const response = await fetch(`${API_URL}/api/v1/auditor/me`, {
       method: 'GET',

@@ -132,7 +132,7 @@ export function buildQuestionSchema(question: PublicPaQuestion): yup.AnySchema {
       })
   }
 
-  // text / select / radio / single_choice / long_text / …
+  // text / single / radio / multi_choice / long_text / …
   return yup
     .mixed()
     .nullable()

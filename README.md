@@ -90,7 +90,11 @@ npm run lint       # проверка кода
 - **React Hook Form + Yup**
 - **Storybook**, **Docusaurus**
 
-API бэкенда проксируется через `/api/proxy` на `survey-all.ru`.
+API бэкенда проксируется через `/api/proxy`.
+
+- **Локально** (`npm run dev`): по умолчанию `http://127.0.0.1:8000` (локальный FastAPI / tunnel).  
+  Явно: скопируй `.env.example` → `.env.local` (`API_URL=http://127.0.0.1:8000`).
+- **Прод**: без `API_URL` → `https://survey-all.ru` (как раньше).
 
 ---
 

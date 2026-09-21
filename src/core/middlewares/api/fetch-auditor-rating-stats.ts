@@ -1,6 +1,5 @@
 import type { AuditorRatingStats } from '@/entities/stats/model/types'
-
-const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://survey-all.ru'
+import { getBackendOrigin } from '@/shared/config/backend-origin'
 
 /**
  * Получает статистику рейтинга аудитора (в т.ч. активные и просроченные проверки).
@@ -16,6 +15,7 @@ export async function fetchAuditorRatingStats(
   accessToken: string,
 ): Promise<AuditorRatingStats | null> {
   try {
+    const API_URL = getBackendOrigin()
     console.log(`[FetchRatingStats] Fetching stats for auditor: ${auditorId}`)
     const response = await fetch(`${API_URL}/api/v1/ratings/auditors/${auditorId}/rating-stats`, {
       method: 'GET',
