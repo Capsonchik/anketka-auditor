@@ -1,0 +1,173 @@
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.block {
+  width: 100%;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  background: $bg-primary;
+  cursor: pointer;
+  transition:
+    border-color $transition-fast,
+    background-color $transition-fast,
+    box-shadow $transition-fast;
+  user-select: none;
+
+  &:hover:not(.optionDisabled) {
+    border-color: $primary-300;
+    background: $bg-hover;
+  }
+
+  &:focus-within:not(.optionDisabled) {
+    border-color: $primary-500;
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.18);
+  }
+}
+
+.optionChecked {
+  border-color: $primary-500;
+  background: rgba($primary-500, 0.08);
+  box-shadow: 0 0 0 1px rgba($primary-500, 0.2);
+
+  .control {
+    border-color: $primary-500;
+    background: $primary-500;
+  }
+
+  .dot {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .label {
+    color: $text-primary;
+  }
+}
+
+.optionDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.control {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border: 2px solid $gray-400;
+  border-radius: 50%;
+  background: $bg-primary;
+  transition:
+    border-color $transition-fast,
+    background-color $transition-fast;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $bg-primary;
+  transform: scale(0.4);
+  opacity: 0;
+  transition:
+    transform $transition-fast,
+    opacity $transition-fast;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: 1.35;
+  color: $text-primary;
+}
+
+.description {
+  font-size: 12px;
+  line-height: 1.35;
+  color: $text-secondary;
+  font-weight: $font-weight-normal;
+}
+
+.size_sm {
+  .option {
+    padding: 8px 12px;
+    gap: 10px;
+  }
+
+  .control {
+    width: 18px;
+    height: 18px;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .label {
+    font-size: 13px;
+  }
+}
+
+.size_md {
+  .label {
+    font-size: $font-size-sm;
+  }
+}
+
+.disabled {
+  pointer-events: none;
+}
+
+.hasError {
+  .option {
+    border-color: $danger-400;
+  }
+
+  .optionChecked {
+    border-color: $danger-500;
+    box-shadow: 0 0 0 1px rgba($danger-500, 0.25);
+  }
+}

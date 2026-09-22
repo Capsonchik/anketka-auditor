@@ -5,11 +5,18 @@ import { useEffect } from 'react'
 import { FormField } from '@/shared/ui/form-field'
 import { Input, Textarea } from '@/shared/ui/input'
 import { CheckPicker, SelectPicker } from '@/shared/ui/picker'
-import { PillSwitchFlexible } from '@/shared/ui/pill-switch-flexible'
+import { RadioGroup } from '@/shared/ui/radio'
 import { FileUploader } from '@/shared/ui/file-uploader'
 import { TimeInput, toTimeInputValue } from '@/shared/ui/time-input'
 import type { PublicPaOptionsItem, PublicPaOption, PublicPaQuestion } from '@/entities/public-pa'
-import { getConfigString, questionAnswerKey } from '@/entities/public-pa'
+import {
+  getConfigString,
+  isRadioQuestionType,
+  isSingleQuestionType,
+  normalizeQuestionType,
+  questionAnswerKey,
+  resolveChoiceUi,
+} from '@/entities/public-pa'
 
 import {
   getVisibleOptionsWithCompletedFallback,
@@ -19,8 +26,6 @@ import {
 import type { AnswersMap } from '../lib/answer-model'
 import { RankOrderEditor } from './rank-order-editor'
 import styles from './question-field.module.scss'
-
-type ChoiceUi = 'select' | 'check' | 'radio'
 
 type MatrixRow = { id?: string; label?: string }
 type MatrixColumn = { id?: string; label?: string }
@@ -48,25 +53,6 @@ function fieldMeta(question: PublicPaQuestion, error?: string, hint?: string | n
     error: error || undefined,
     hint: error ? undefined : hint || question.description || undefined,
   }
-}
-
-function resolveChoiceUi(type: string, config: Record<string, unknown> | null): ChoiceUi | null {
-  const uiRaw = getConfigString(config, 'ui')?.toLowerCase() ?? null
-  if (uiRaw === 'radio') return 'radio'
-  if (uiRaw === 'select' || uiRaw === 'selectpicker') return 'select'
-  if (uiRaw === 'check' || uiRaw === 'checkbox' || uiRaw === 'checkpicker') return 'check'
-
-  if (type === 'radio') return 'radio'
-  if (
-    type === 'multi_choice' ||
-    type === 'multiselect' ||
-    type === 'checkbox' ||
-    type === 'check'
-  ) {
-    return 'check'
-  }
-  if (type === 'select' || type === 'single_choice' || type === 'dropdown') return 'select'
-  return null
 }
 
 function toPickerData(options: Array<{ value: string; label: string }>) {
@@ -133,8 +119,9 @@ function MatrixField({
       ? (value as Record<string, unknown>)
       : {}
 
-  // Кабинет: radio/select → SelectPicker по строке (удобнее на мобиле); иначе таблица как /pa
-  const useRowSelect = fieldType === 'radio' || fieldType === 'select' || !fieldType
+  // Кабинет: radio/single → SelectPicker по строке (удобнее на мобиле)
+  const useRowSelect =
+    isRadioQuestionType(fieldType) || isSingleQuestionType(fieldType) || !fieldType
 
   if (useRowSelect && columns.length > 0) {
     const columnOptions = columns.map((column, colIdx) => {
@@ -281,7 +268,7 @@ export function QuestionField({
   error,
   onChange,
 }: QuestionFieldProps) {
-  const type = String(question.type || '').toLowerCase()
+  const type = normalizeQuestionType(question.type, question.config ?? null)
   const code = questionAnswerKey(question)
   const meta = (hint?: string | null) => fieldMeta(question, error, hint)
   const staticOptions = (question.options || []).map((o) => ({
@@ -313,16 +300,14 @@ export function QuestionField({
   })
 
   const pickerData = toPickerData(visibleOptions)
-  // Лоадер только пока идёт запрос и показывать ещё нечего (есть static/dynamic — не крутим)
   const optionsLoading = isOptionsLoading && visibleOptions.length === 0
   const stringValue = value == null ? '' : String(value)
-  const choiceUi = resolveChoiceUi(type, question.config)
+  const choiceUi = resolveChoiceUi(question.type, question.config)
   const completedHint =
     hiddenCount > 0
       ? `Уже отправлено: ${hiddenCount} из ${sourceOptions.length}${usedFallback ? '. Показаны все варианты.' : ''}`
       : undefined
 
-  // После continue выбранный SKU скрывается из списка — нельзя оставлять «призрак» в value
   const valueInVisibleOptions =
     !stringValue || visibleOptions.some((option) => String(option.value) === stringValue)
   const selectDisplayValue =
@@ -333,7 +318,6 @@ export function QuestionField({
         visibleOptions.some((option) => String(option.value) === item),
       )
 
-  // Readonly: если value нет в options — добавляем синтетическую опцию для подписи
   const pickerDataWithValue =
     readOnly && selectDisplayValue && !valueInVisibleOptions
       ? [...pickerData, { value: selectDisplayValue, label: selectDisplayValue }]
@@ -341,7 +325,7 @@ export function QuestionField({
 
   useEffect(() => {
     if (readOnly || optionsLoading) return
-    if (choiceUi === 'select' || choiceUi === 'radio') {
+    if (choiceUi === 'single' || choiceUi === 'radio') {
       if (stringValue && !valueInVisibleOptions) onChange(null)
       return
     }
@@ -390,7 +374,15 @@ export function QuestionField({
   }
 
   if (type === 'matrix') {
-    return <MatrixField question={question} value={value} readOnly={readOnly} error={error} onChange={onChange} />
+    return (
+      <MatrixField
+        question={question}
+        value={value}
+        readOnly={readOnly}
+        error={error}
+        onChange={onChange}
+      />
+    )
   }
 
   if (type === 'rank') {
@@ -466,48 +458,29 @@ export function QuestionField({
   }
 
   if (choiceUi === 'radio') {
-    if (visibleOptions.length > 0 && visibleOptions.length <= 8) {
-      return (
-        <FormField {...meta(completedHint || question.description)}>
-          <PillSwitchFlexible
-            name={code}
-            size="small"
-            disabled={readOnly}
-            data={pickerDataWithValue}
-            value={selectDisplayValue || ''}
-            onChange={(next) => {
-              if (readOnly) return
-              onChange(String(next))
-            }}
-          />
-        </FormField>
-      )
-    }
     return (
       <FormField {...meta(completedHint || question.description)}>
-        <div className={styles.radioGroup}>
-          {visibleOptions.map((option) => (
-            <label key={option.value} className={styles.inlineCheck}>
-              <input
-                type="radio"
-                name={code}
-                value={option.value}
-                checked={selectDisplayValue === option.value}
-                disabled={readOnly}
-                onChange={() => {
-                  if (readOnly) return
-                  onChange(option.value)
-                }}
-              />
-              <span>{option.label}</span>
-            </label>
-          ))}
-        </div>
+        <RadioGroup
+          name={code}
+          block
+          size="md"
+          disabled={readOnly || optionsLoading}
+          error={error}
+          value={selectDisplayValue}
+          options={pickerDataWithValue.map((option) => ({
+            value: option.value,
+            label: option.label,
+          }))}
+          onChange={(next) => {
+            if (readOnly) return
+            onChange(String(next))
+          }}
+        />
       </FormField>
     )
   }
 
-  if (choiceUi === 'select') {
+  if (choiceUi === 'single') {
     return (
       <FormField {...meta(completedHint || question.description)}>
         <SelectPicker
@@ -541,7 +514,7 @@ export function QuestionField({
       value: String(min + i * step),
       label: String(min + i * step),
     }))
-    if (ui === 'select' || ui === 'selectpicker') {
+    if (ui === 'select' || ui === 'selectpicker' || ui === 'single') {
       return (
         <FormField {...meta()}>
           <SelectPicker

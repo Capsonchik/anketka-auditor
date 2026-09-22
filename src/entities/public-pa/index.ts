@@ -22,6 +22,19 @@ export {
 } from './model/types'
 
 export {
+  isMultiChoiceQuestionType,
+  isRadioQuestionType,
+  isSingleQuestionType,
+  normalizeQuestionType,
+  RADIO_QUESTION_TYPE,
+  RADIO_TYPE_ALIASES,
+  resolveChoiceUi,
+  SINGLE_QUESTION_TYPE,
+  SINGLE_TYPE_ALIASES,
+} from './model/question-types'
+export type { ChoiceUiKind } from './model/question-types'
+
+export {
   publicPaApi,
   useGetPublicPaQuery,
   useGetPublicPaDraftQuery,

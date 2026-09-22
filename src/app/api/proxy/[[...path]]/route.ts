@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 import { auditorAuthRefresh } from '@/core/middlewares/api/auditor-auth-refresh'
-
-const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://survey-all.ru'
+import { getBackendOrigin } from '@/shared/config/backend-origin'
 
 const cookieOptions = {
   httpOnly: true,
@@ -104,6 +103,7 @@ async function handleProxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname.replace('/api/proxy', '')
   const searchParams = request.nextUrl.searchParams.toString()
+  const API_URL = getBackendOrigin()
   const targetUrl = `${API_URL}${pathname}${searchParams ? `?${searchParams}` : ''}`
 
   console.log(`[Proxy] Forwarding ${request.method} to: ${targetUrl}`)

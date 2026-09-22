@@ -1,4 +1,4 @@
-const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://survey-all.ru'
+import { getBackendOrigin } from '@/shared/config/backend-origin'
 
 /**
  * Выполняет обновление токенов через API.
@@ -8,6 +8,7 @@ const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https
  */
 export async function auditorAuthRefresh(refreshToken: string) {
   try {
+    const API_URL = getBackendOrigin()
     console.log(`[AuditorAuthRefresh] Refreshing token at: ${API_URL}/api/v1/auditor-auth/refresh`)
     const response = await fetch(`${API_URL}/api/v1/auditor-auth/refresh`, {
       method: 'POST',
